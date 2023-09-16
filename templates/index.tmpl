@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ . }}</title>
+<link rel="stylesheet" href="/style/index.css">
+</head>
+<body>
+  <header>"icon" Космодром Восточный "user_icon" "Логин"</header>
+  <img src="/" alt="Красивая картинка"/>
+  <!-- Внутри картинки надпись: заявки на выведение КА на орбиту -->
+  <div class="card_container">
+    <div class="card">
+      <div class="card-img_container">
+        <img src="/" alt="Картинка карточки"/>
+      </div>
+      <div class="card-content">
+        <div class="card-text_container">
+          <h3>
+            "Заголовок"
+            {{ .title }}
+          </h3>
+          <p>
+            Описание: <span>"Вставить описание"</span>
+            Грузоподъёмность: <span>"Вставить грузоподъёмность"</span>
+            Планируемая дата полёта: <span>"Вставить дату полёта"</span>
+            Цена услуги: <span>"Вставить цену услуги"</span>
+          </p>
+        </div>
+        <div class="card-btn_container">
+          <button>
+            Подробнее
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>Как связаться с нами</footer>
+</body>
+</html>
