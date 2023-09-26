@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Восточный</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:100" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/st-simplesquare" rel="stylesheet">
+    <link rel="stylesheet" href="/style/index.css">
+</head>
+<body>
+<div class="header">
+    <header>
+        <div class="header-icon_container">
+            <div class="roscosmos_icon"></div>
+            <div>Роскосмос</div>
+        </div>
+        <div class="header-navbar_container">
+            <div>Главная</div>
+            <div>Услуги</div>
+            <div>Галерея</div>
+            <div>Контакты</div>
+        </div>
+        <div class="header-user_container">
+            <div>Иконка</div>
+            <div>Алик Нигматуллин</div>
+        </div>
+    </header>
+</div>
+<div class="under_header"></div>
+<div class="card_container__simple">
+<div id ="{{ .card.Id }}" class="card__detailed">
+    <div class="card-img_container__detailed">
+        <div class="card-img" style="background-image: url({{ .card.ImgURL }});"></div>
+    </div>
+    <div class="card-content">
+        <div class="card-btn_container">
+            <form action="http://127.0.0.1:8080/home">
+                <input type="submit" value="Назад">
+            </form>
+        </div>
+        <div class="card-text_container">
+            <h3>
+                {{ .card.Title }}
+            </h3>
+            <div>
+                <div>
+                    Описание: <span>{{ .card.Description }}</span>
+                </div>
+                <div>
+                    Грузоподъёмность: <span>{{ .card.LoadCapacity }} тонн</span>
+                </div>
+                <div>
+                    Планируемая дата полёта: <span>{{ .card.FlightDate }}</span>
+                </div>
+                <div>
+                    Цена услуги: <span>{{ .card.Price }} млн рублей</span>
+                </div>
+            </div>
+            <div>
+                {{ .card.DetailedDescription}}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{{/*<footer>Как связаться с нами</footer>*/}}
+</body>
+</html>

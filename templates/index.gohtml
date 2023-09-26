@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Восточный</title>
+<link href="https://fonts.googleapis.com/css?family=Montserrat:100" rel="stylesheet">
+<link href="https://fonts.cdnfonts.com/css/st-simplesquare" rel="stylesheet">
+<link rel="stylesheet" href="/style/index.css">
+</head>
+<body>
+  <div class="header">
+    <header>
+      <div class="header-icon_container">
+        <div class="roscosmos_icon"></div>
+        <div>Роскосмос</div>
+      </div>
+      <div class="header-navbar_container">
+        <div>Главная</div>
+        <div>Услуги</div>
+        <div>Галерея</div>
+        <div>Контакты</div>
+      </div>
+      <div class="header-user_container">
+        <div>Иконка</div>
+        <div>Алик Нигматуллин</div>
+      </div>
+    </header>
+
+    <div class="header-title">
+      Космодром Восточный
+    </div>
+
+    <div class="header-subtitle">
+      Один из самых масштабных проектов России ХХI века
+    </div>
+    <!-- Внутри картинки надпись: заявки на выведение КА на орбиту -->
+  </div>
+  <div class="search_container">
+    <form action="http://127.0.0.1:8080/home">
+      <input type="text" name="search" placeholder="Введите название">
+      <input type="submit" value="Найти">
+    </form>
+  </div>
+  <div class="card_container">
+    {{ range .cards }}
+      <div id ="{{ .Id }}" class="card">
+        <div class="card-img_container">
+          <div class="card-img" style="background-image: url({{ .ImgURL }});"></div>
+        </div>
+        <div class="card-content">
+          <div class="card-text_container">
+            <h3>
+              {{ .Title }}
+            </h3>
+            <div>
+              <div>
+                Описание: <span>{{ .Description }}</span>
+              </div>
+              <div>
+                Грузоподъёмность: <span>{{ .LoadCapacity }} тонн</span>
+              </div>
+              <div>
+                Планируемая дата полёта: <span>{{ .FlightDate }}</span>
+              </div>
+              <div>
+                Цена услуги: <span>{{ .Price }} млн рублей</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-btn_container">
+            <form action="http://127.0.0.1:8080/card">
+              <input type="hidden" name="cardId" value="{{ .Id }}">
+              <input type="submit" value="Подробнее">
+            </form>
+          </div>
+        </div>
+      </div>
+    {{end}}
+  </div>
+  <footer>Как связаться с нами</footer>
+</body>
+</html>
