@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -138,14 +139,33 @@ func StartServer() {
 	r.GET("/home", func(c *gin.Context) {
 		queryString := c.Request.URL.Query() // queryString - это тип url.Values, который содержит все query параметры
 
-		strSearch := queryString.Get("cardId") // Получение значения конкретного параметра по его имени
+		strSearch := queryString.Get("search") // Получение значения конкретного параметра по его имени
+		fmt.Println("Query параметр ", strSearch)
 		if strSearch == "" {
+			fmt.Println("Query параметр пуст")
 			c.HTML(http.StatusOK, "index.gohtml", gin.H{
 				"cards": cards,
 			})
 		} else {
+			fmt.Println("Query параметр найден")
+			var selectedCards []CardLaunchVehicle
+			flag := false
 			for i := 0; i < len(cards); i++ {
+				if strings.Contains(cards[i].Title, strSearch) {
+					flag = true
+					selectedCards = append(selectedCards, cards[i])
+				}
+			}
+			fmt.Println("Подходящие карточки ", selectedCards)
 
+			if flag {
+				c.HTML(http.StatusOK, "index.gohtml", gin.H{
+					"cards": selectedCards,
+				})
+			} else {
+				c.HTML(http.StatusOK, "index.gohtml", gin.H{
+					"cards": "",
+				})
 			}
 		}
 

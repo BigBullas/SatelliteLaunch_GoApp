@@ -41,38 +41,44 @@
     </form>
   </div>
   <div class="card_container">
-    {{ range .cards }}
-      <div id ="{{ .Id }}" class="card">
-        <div class="card-img_container">
-          <div class="card-img" style="background-image: url({{ .ImgURL }});"></div>
-        </div>
-        <div class="card-content">
-          <div class="card-text_container">
-            <h3>
-              {{ .Title }}
-            </h3>
-            <div>
+    {{if .cards}}
+      {{ range .cards }}
+        <div id ="{{ .Id }}" class="card">
+          <div class="card-img_container">
+            <div class="card-img" style="background-image: url({{ .ImgURL }});"></div>
+          </div>
+          <div class="card-content">
+            <div class="card-text_container">
+              <h3>
+                {{ .Title }}
+              </h3>
               <div>
-                Описание: <span>{{ .Description }}</span>
-              </div>
-              <div>
-                Грузоподъёмность: <span>{{ .LoadCapacity }} тонн</span>
-              </div>
-              <div>
-                Планируемая дата полёта: <span>{{ .FlightDate }}</span>
-              </div>
-              <div>
-                Цена услуги: <span>{{ .Price }} млн рублей</span>
+                <div>
+                  Описание: <span>{{ .Description }}</span>
+                </div>
+                <div>
+                  Грузоподъёмность: <span>{{ .LoadCapacity }} тонн</span>
+                </div>
+                <div>
+                  Планируемая дата полёта: <span>{{ .FlightDate }}</span>
+                </div>
+                <div>
+                  Цена услуги: <span>{{ .Price }} млн рублей</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="card-btn_container">
-            <form action="http://127.0.0.1:8080/card">
-              <input type="hidden" name="cardId" value="{{ .Id }}">
-              <input type="submit" value="Подробнее">
-            </form>
+            <div class="card-btn_container">
+              <form action="http://127.0.0.1:8080/card">
+                <input type="hidden" name="cardId" value="{{ .Id }}">
+                <input type="submit" value="Подробнее">
+              </form>
+            </div>
           </div>
         </div>
+      {{end}}
+    {{else}}
+      <div>
+        <h2>Ничего не найдено</h2>
       </div>
     {{end}}
   </div>
