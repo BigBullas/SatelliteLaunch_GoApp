@@ -140,14 +140,12 @@ func StartServer() {
 		queryString := c.Request.URL.Query() // queryString - это тип url.Values, который содержит все query параметры
 
 		strSearch := queryString.Get("search") // Получение значения конкретного параметра по его имени
-		fmt.Println("Query параметр ", strSearch)
 		if strSearch == "" {
-			fmt.Println("Query параметр пуст")
 			c.HTML(http.StatusOK, "index.gohtml", gin.H{
-				"cards": cards,
+				"cards":  cards,
+				"search": strSearch,
 			})
 		} else {
-			fmt.Println("Query параметр найден")
 			var selectedCards []CardLaunchVehicle
 			flag := false
 			for i := 0; i < len(cards); i++ {
@@ -156,15 +154,16 @@ func StartServer() {
 					selectedCards = append(selectedCards, cards[i])
 				}
 			}
-			fmt.Println("Подходящие карточки ", selectedCards)
 
 			if flag {
 				c.HTML(http.StatusOK, "index.gohtml", gin.H{
-					"cards": selectedCards,
+					"cards":  selectedCards,
+					"search": strSearch,
 				})
 			} else {
 				c.HTML(http.StatusOK, "index.gohtml", gin.H{
-					"cards": "",
+					"cards":  "",
+					"search": strSearch,
 				})
 			}
 		}
