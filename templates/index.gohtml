@@ -35,8 +35,8 @@
     <!-- Внутри картинки надпись: заявки на выведение КА на орбиту -->
   </div>
   <div class="search_container">
-    <form action="http://127.0.0.1:8080/home">
-      <input type="text" name="search" placeholder="Введите название">
+    <form action="/home">
+      <input type="text" name="search" placeholder="Введите название" value="{{}}">
       <input type="submit" value="Найти">
     </form>
   </div>
@@ -68,7 +68,7 @@
               </div>
             </div>
             <div class="card-btn_container">
-              <form action="http://127.0.0.1:8080/card">
+              <form action="/card">
                 <input type="hidden" name="cardId" value="{{ .Id }}">
                 <input type="submit" value="Подробнее">
               </form>
