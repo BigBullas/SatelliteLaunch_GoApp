@@ -151,7 +151,7 @@ func StartServer() {
 			var selectedCards []CardLaunchVehicle
 			flag := false
 			for i := 0; i < len(cards); i++ {
-				if strings.Contains(cards[i].Title, strSearch) {
+				if strings.Contains(strings.ToLower(cards[i].Title), strings.ToLower(strSearch)) {
 					flag = true
 					selectedCards = append(selectedCards, cards[i])
 				}
