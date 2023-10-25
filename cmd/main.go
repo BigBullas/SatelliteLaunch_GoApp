@@ -10,3 +10,5 @@ func main() {
 	api.StartServer()
 	log.Println("Application terminated!")
 }
+
+//  docker run --name postgres -e POSTGRES_PASSWORD=password123 -d postgres
