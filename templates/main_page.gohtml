@@ -36,7 +36,7 @@
   </div>
   <div class="search_container">
     <form action="/home">
-      <input type="text" name="search" placeholder="Введите название" value="{{ .search }}">
+      <input type="text" name="spacecraft" placeholder="Введите название КА" value="{{ .spacecraft }}">
       <input type="submit" value="Найти">
     </form>
   </div>
@@ -57,7 +57,7 @@
                   Описание: <span>{{ .Description }}</span>
                 </div>
                 <div>
-                  Грузоподъёмность: <span>{{ .LoadCapacity }} тонн</span>
+                  Вес: <span>{{ .LoadCapacity }} тонн</span>
                 </div>
                 <div>
                   Планируемая дата полёта: <span>{{ .FlightDate }}</span>
