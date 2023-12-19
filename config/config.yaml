@@ -1,2 +1,2 @@
 db:
-  connection_string: "host=localhost port=5433 user=nigmatullin dbname=rip_lab options='-c search_path=public' password=qwerty321 sslmode=disable"
+  connection_string: "host=localhost port=5433 user=admin dbname=rip_lab options='-c search_path=public' password=qwerty321 sslmode=disable"

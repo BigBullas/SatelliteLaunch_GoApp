@@ -1,9 +1,10 @@
 package main
 
 import (
-	"RIP_lab1/internal/api/pkg"
 	"RIP_lab1/internal/api/handler"
 	"RIP_lab1/internal/api/repository"
+	"RIP_lab1/internal/pkg"
+
 	log "github.com/sirupsen/logrus"
 )
 

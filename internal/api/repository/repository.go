@@ -37,6 +37,34 @@ func NewRepo(dsn string) (*Repository, error) {
 	}, nil
 }
 
+// func NewRepository(connectionString string) (*Repository, error) {
+// 	db, err := gorm.Open(postgres.Open(connectionString), &gorm.Config{})
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	// Migrate the schema
+// 	err = db.AutoMigrate(&models.Threat{})
+// 	if err != nil {
+// 		panic("cant migrate db")
+// 	}
+
+// 	return &Repository{
+// 		db: db,
+// 	}, nil
+// }
+
+// func (r *Repository) GetThreatByID(threatId int) (models.Threat, error) {
+// 	threat := models.Threat{}
+
+// 	err := r.db.First(&threat, "threat_id = ?", strconv.Itoa(threatId)).Error
+// 	if err != nil {
+// 		return threat, err
+// 	}
+
+// 	return threat, nil
+// }
+
 func (r *Repository) GetProductByID(id uint) (*models.Product, error) {
 	product := &models.Product{}
 
