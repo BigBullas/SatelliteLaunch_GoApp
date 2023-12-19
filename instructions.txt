@@ -1,0 +1,3 @@
+в терминале для захода под ролью postgres: sudo -u postgres psql
+
+postgresql пользователь: nigmatullin qwerty321
