@@ -5,13 +5,13 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"RIP_lab1/internal/api/dsn"
+	"RIP_lab1/internal/api/pkg"
 	"RIP_lab1/internal/models"
 )
 
 func main() {
 	_ = godotenv.Load()
-	db, err := gorm.Open(postgres.Open(dsn.FromEnv()), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(pkg.GetConnectionString()), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}

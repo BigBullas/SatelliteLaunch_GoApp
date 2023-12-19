@@ -11,7 +11,22 @@ type Repository struct {
 	db *gorm.DB
 }
 
-func New(dsn string) (*Repository, error) {
+// DeleteStarById implements api.Repo.
+func (*Repository) DeleteStarById(starId int) error {
+	panic("unimplemented")
+}
+
+// GetStarByID implements api.Repo.
+func (*Repository) GetStarByID(threatId int) (models.Product, error) {
+	panic("unimplemented")
+}
+
+// GetStarsByNameFilter implements api.Repo.
+func (*Repository) GetStarsByNameFilter(substring string) ([]models.Product, error) {
+	panic("unimplemented")
+}
+
+func NewRepo(dsn string) (*Repository, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
