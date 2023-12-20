@@ -18,7 +18,7 @@ func NewRepo(dsn string) (*Repository, error) {
 	}
 
 	// Migrate the schema
-	err = db.AutoMigrate(&models.RequestForDelivery{})
+	err = db.AutoMigrate(&models.FlightRequest{})
 	if err != nil {
 		panic("Миграция БД не удалась")
 	}
@@ -28,15 +28,15 @@ func NewRepo(dsn string) (*Repository, error) {
 	}, nil
 }
 
-func (r *Repository) GetRequestForDeliveryList(substring string) ([]models.RequestForDelivery, error) {
-	var request_for_delivery []models.RequestForDelivery
+func (r *Repository) GetRequestForDeliveryList(substring string) ([]models.FlightRequest, error) {
+	var request_for_delivery []models.FlightRequest
 
 	r.db.Where("title ILIKE ?", "%"+substring+"%").Find(&request_for_delivery, "is_available = ?", true)
 	return request_for_delivery, nil
 }
 
-func (r *Repository) GetCardRequestForDeliveryByID(cardId int) (models.RequestForDelivery, error) {
-	var card models.RequestForDelivery
+func (r *Repository) GetCardRequestForDeliveryByID(cardId int) (models.FlightRequest, error) {
+	var card models.FlightRequest
 
 	r.db.Where("request_id = ?", cardId).Find(&card, "is_available = ?", true)
 	return card, nil

@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"RIP_lab1/internal/api"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
@@ -15,7 +16,7 @@ type Handler struct {
 
 func NewHandler(repo api.Repo) *Handler {
 	return &Handler{repo: repo}
-}	
+}
 
 func (h *Handler) StartServer() {
 	log.Println("Server start up")
@@ -26,11 +27,11 @@ func (h *Handler) StartServer() {
 	r.LoadHTMLGlob("templates/*")
 
 	r.GET("/home", h.GetRequestForDeliveryList)
-	r.GET("/card/:id", h.GetRequestForDeliveryList)
-	r.POST("/card/:id", h.DeleteRequestForDeliveryById)
+	r.GET("/card/", h.GetCardRequestForDeliveryById)
+	r.POST("/card/", h.DeleteRequestForDeliveryById)
 
 	r.Static("/image", "./resources")
-	r.Static("/styles", "./styles")
+	r.Static("/style", "./style")
 
 	err := r.Run()
 	if err != nil {
@@ -39,7 +40,7 @@ func (h *Handler) StartServer() {
 }
 
 func (h *Handler) GetRequestForDeliveryList(c *gin.Context) {
-	queryString := c.Request.URL.Query() // queryString - это тип url.Values, который содержит все query параметры
+	queryString := c.Request.URL.Query()       // queryString - это тип url.Values, который содержит все query параметры
 	strSearch := queryString.Get("spacecraft") // Получение значения конкретного параметра по его имени
 
 	data, err := h.repo.GetRequestForDeliveryList(strSearch)
@@ -47,8 +48,8 @@ func (h *Handler) GetRequestForDeliveryList(c *gin.Context) {
 		log.Println(err)
 	}
 
-	c.HTML(http.StatusOK, "main_page.gohtml", gin.H{
-		"cards": data,
+	c.HTML(http.StatusOK, "index.gohtml", gin.H{
+		"cards":      data,
 		"spacecraft": strSearch,
 	})
 }
@@ -68,7 +69,7 @@ func (h *Handler) GetCardRequestForDeliveryById(c *gin.Context) {
 		log.Println(err)
 	}
 
-	c.HTML(http.StatusOK, "spacecraft_card.gohtml", gin.H{
+	c.HTML(http.StatusOK, "card_launch_vehicle.gohtml", gin.H{
 		"card": card,
 	})
 }
@@ -82,14 +83,16 @@ func (h *Handler) DeleteRequestForDeliveryById(c *gin.Context) {
 		log.Println("Ошибка при преобразовании строки в число:", err)
 		return
 	}
-	
+
+	log.Println("HANDLER, cardId: ", cardId)
+
 	err = h.repo.DeleteRequestForDeliveryById(cardId)
 	if err != nil {
-		log.Printf("Ошибка при получении заявки на доставку по id: ", cardId, err)
+		log.Println("Ошибка при получении заявки на доставку по id: ", cardId, err)
 		c.Error(err)
 		return
 	}
-	c.Redirect(http.StatusFound, "/home")
+	c.Redirect(http.StatusOK, "/home")
 }
 
 func (h *Handler) Ping(c *gin.Context) {

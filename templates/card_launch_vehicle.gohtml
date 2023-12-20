@@ -36,6 +36,10 @@
             <form action="/home">
                 <input type="submit" value="Назад">
             </form>
+            <form action="/card" method="post">
+                <input type="hidden" name="cardId" value="{{ .card.Id }}">
+                <input type="submit" value="Удалить">
+            </form>
         </div>
         <div class="card-text_container">
             <h3>
@@ -49,10 +53,10 @@
                     Грузоподъёмность: <span>{{ .card.LoadCapacity }} тонн</span>
                 </div>
                 <div>
-                    Планируемая дата полёта: <span>{{ .card.FlightDate }}</span>
+                    Планируемая дата полёта: от <span>{{ .card.FlightDateStart }}</span> до <span>{{ .card.FlightDateEnd }}</span>
                 </div>
                 <div>
-                    Цена услуги: <span>{{ .card.Price }} млн рублей</span>
+                    Желаемая цена услуги: <span>{{ .card.DesiredPrice }} млн рублей</span>
                 </div>
             </div>
             <div>

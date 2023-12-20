@@ -36,7 +36,7 @@
   </div>
   <div class="search_container">
     <form action="/home">
-      <input type="text" name="search" placeholder="Введите название" value="{{ .search }}">
+      <input type="text" name="spacecraft" placeholder="Введите название" value="{{ .spacecraft }}">
       <input type="submit" value="Найти">
     </form>
   </div>
@@ -60,10 +60,10 @@
                   Грузоподъёмность: <span>{{ .LoadCapacity }} тонн</span>
                 </div>
                 <div>
-                  Планируемая дата полёта: <span>{{ .FlightDate }}</span>
+                  Планируемая дата полёта: от <span>{{ .FlightDateStart }}</span> до <span>{{ .FlightDateEnd }}</span> 
                 </div>
                 <div>
-                  Цена услуги: <span>{{ .Price }} млн рублей</span>
+                  Цена услуги: <span>{{ .DesiredPrice }} млн рублей</span>
                 </div>
               </div>
             </div>
@@ -71,6 +71,9 @@
               <form action="/card">
                 <input type="hidden" name="cardId" value="{{ .Id }}">
                 <input type="submit" value="Подробнее">
+              </form>
+              <form action="/card/{{ .Id }}" method="post">
+                <input type="submit" value="Удалить">
               </form>
             </div>
           </div>
