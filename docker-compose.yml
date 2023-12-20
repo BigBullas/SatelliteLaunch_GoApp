@@ -13,7 +13,6 @@ services:
    volumes:
      - /home/ubuntu/db_data:/var/lib/postgresql/data
      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
-     - ./sql/fill.sql:/docker-entrypoint-initdb.d/fill.sql
 
 volumes:
  postgresdb-data:

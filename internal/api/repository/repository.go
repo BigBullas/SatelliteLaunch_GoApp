@@ -11,25 +11,16 @@ type Repository struct {
 	db *gorm.DB
 }
 
-// DeleteStarById implements api.Repo.
-func (*Repository) DeleteStarById(starId int) error {
-	panic("unimplemented")
-}
-
-// GetStarByID implements api.Repo.
-func (*Repository) GetStarByID(threatId int) (models.Product, error) {
-	panic("unimplemented")
-}
-
-// GetStarsByNameFilter implements api.Repo.
-func (*Repository) GetStarsByNameFilter(substring string) ([]models.Product, error) {
-	panic("unimplemented")
-}
-
 func NewRepo(dsn string) (*Repository, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
+	}
+
+	// Migrate the schema
+	err = db.AutoMigrate(&models.RequestForDelivery{})
+	if err != nil {
+		panic("Миграция БД не удалась")
 	}
 
 	return &Repository{
@@ -37,45 +28,21 @@ func NewRepo(dsn string) (*Repository, error) {
 	}, nil
 }
 
-// func NewRepository(connectionString string) (*Repository, error) {
-// 	db, err := gorm.Open(postgres.Open(connectionString), &gorm.Config{})
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (r *Repository) GetRequestForDeliveryList(substring string) ([]models.RequestForDelivery, error) {
+	var request_for_delivery []models.RequestForDelivery
 
-// 	// Migrate the schema
-// 	err = db.AutoMigrate(&models.Threat{})
-// 	if err != nil {
-// 		panic("cant migrate db")
-// 	}
-
-// 	return &Repository{
-// 		db: db,
-// 	}, nil
-// }
-
-// func (r *Repository) GetThreatByID(threatId int) (models.Threat, error) {
-// 	threat := models.Threat{}
-
-// 	err := r.db.First(&threat, "threat_id = ?", strconv.Itoa(threatId)).Error
-// 	if err != nil {
-// 		return threat, err
-// 	}
-
-// 	return threat, nil
-// }
-
-func (r *Repository) GetProductByID(id uint) (*models.Product, error) {
-	product := &models.Product{}
-
-	err := r.db.First(product, "id = ?", "1").Error // find product with id = 1
-	if err != nil {
-		return nil, err
-	}
-
-	return product, nil
+	r.db.Where("title ILIKE ?", "%"+substring+"%").Find(&request_for_delivery, "is_available = ?", true)
+	return request_for_delivery, nil
 }
 
-func (r *Repository) CreateProduct(product models.Product) error {
-	return r.db.Create(product).Error
+func (r *Repository) GetCardRequestForDeliveryByID(cardId int) (models.RequestForDelivery, error) {
+	var card models.RequestForDelivery
+
+	r.db.Where("request_id = ?", cardId).Find(&card, "is_available = ?", true)
+	return card, nil
+}
+
+func (r *Repository) DeleteRequestForDeliveryById(cardId int) error {
+	r.db.Where("request_id = ? AND is_available = ?", cardId, true).Update("is_available", false)
+	return nil
 }
