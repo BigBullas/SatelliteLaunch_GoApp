@@ -3,15 +3,15 @@ package models
 import "time"
 
 type FlightRequest struct {
-	Id                  int `gorm:"primarykey"`
-	ImgURL              string
-	Title               string
-	LoadCapacity        float64
-	Description         string
-	DetailedDescription string
-	DesiredPrice        float64
-	FlightDateStart     time.Time
-	FlightDateEnd       time.Time
+	Id              int `gorm:"primarykey"`
+	ImgURL          string
+	Title           string
+	LoadCapacity    float64
+	Description     string
+	DetailedDesc    string
+	DesiredPrice    float64
+	FlightDateStart time.Time
+	FlightDateEnd   time.Time
 }
 
 // request_id          integer not null
