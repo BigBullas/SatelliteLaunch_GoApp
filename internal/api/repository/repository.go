@@ -28,21 +28,21 @@ func NewRepo(dsn string) (*Repository, error) {
 	}, nil
 }
 
-func (r *Repository) GetRequestForDeliveryList(substring string) ([]models.FlightRequest, error) {
+func (r *Repository) GetRequestForFlightList(substring string) ([]models.FlightRequest, error) {
 	var request_for_delivery []models.FlightRequest
 
 	r.db.Where("title ILIKE ?", "%"+substring+"%").Find(&request_for_delivery, "is_available = ?", true)
 	return request_for_delivery, nil
 }
 
-func (r *Repository) GetCardRequestForDeliveryByID(cardId int) (models.FlightRequest, error) {
+func (r *Repository) GetCardRequestForFlightById(cardId int) (models.FlightRequest, error) {
 	var card models.FlightRequest
 
 	r.db.Where("request_id = ?", cardId).Find(&card, "is_available = ?", true)
 	return card, nil
 }
 
-func (r *Repository) DeleteRequestForDeliveryById(cardId int) error {
+func (r *Repository) DeleteRequestForFlightById(cardId int) error {
 	err := r.db.Exec("UPDATE flight_requests SET is_available=false WHERE request_id = ?", cardId).Error
 	if err != nil {
 		return err

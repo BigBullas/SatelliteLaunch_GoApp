@@ -3,7 +3,7 @@ package api
 import "RIP_lab1/internal/models"
 
 type Repo interface {
-	GetRequestForDeliveryList(substring string) ([]models.FlightRequest, error)
-	GetCardRequestForDeliveryByID(cardId int) (models.FlightRequest, error)
-	DeleteRequestForDeliveryById(cardId int) error
+	GetRequestForFlightList(substring string) ([]models.FlightRequest, error)
+	GetCardRequestForFlightById(cardId int) (models.FlightRequest, error)
+	DeleteRequestForFlightById(cardId int) error
 }

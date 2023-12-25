@@ -36,7 +36,7 @@
   </div>
   <div class="search_container">
     <form action="/home">
-      <input type="text" name="spacecraft" placeholder="Введите название" value="{{ .spacecraft }}">
+      <input type="text" name="space_satellite" placeholder="Введите название" value="{{ .space_satellite }}">
       <input type="submit" value="Найти">
     </form>
   </div>
@@ -66,15 +66,14 @@
                   Цена услуги: <span>{{ .DesiredPrice }} млн рублей</span>
                 </div>
               </div>
-            </div>                <input type="hidden" name="cardId" value="{{ .Id }}">
+            </div>
             <div class="card-btn_container">
-              <form action="/card">
-                <input type="hidden" name="cardId" value="{{ .Id }}">
+              <form action="http://localhost:8080/flight_request/{{ .Id }}" method="get">
                 <input type="submit" value="Подробнее">
               </form>
-              <form action="http://localhost:8080/card/{{ .Id }}" method="post">
+              <form action="http://localhost:8080/flight_request/{{ .Id }}" method="post">
                 <button class="card-button">Удалить услугу</button>
-            </form>
+              </form>
             </div>
           </div>
         </div>
