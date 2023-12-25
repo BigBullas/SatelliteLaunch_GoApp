@@ -28,7 +28,7 @@ func (h *Handler) StartServer() {
 
 	r.GET("/home", h.GetRequestForDeliveryList)
 	r.GET("/card/", h.GetCardRequestForDeliveryById)
-	r.POST("/card/", h.DeleteRequestForDeliveryById)
+	r.POST("/card/:cardId", h.DeleteRequestForDeliveryById)
 
 	r.Static("/image", "./resources")
 	r.Static("/style", "./style")
@@ -75,13 +75,11 @@ func (h *Handler) GetCardRequestForDeliveryById(c *gin.Context) {
 }
 
 func (h *Handler) DeleteRequestForDeliveryById(c *gin.Context) {
-	queryString := c.Request.URL.Query() // queryString - это тип url.Values, который содержит все query параметры
 
-	strCardId := queryString.Get("cardId") // Получение значения конкретного параметра по его имени
+	strCardId := c.Param("cardId")
 	cardId, err := strconv.Atoi(strCardId)
 	if err != nil {
 		log.Println("Ошибка при преобразовании строки в число:", err)
-		return
 	}
 
 	log.Println("HANDLER, cardId: ", cardId)
@@ -92,7 +90,7 @@ func (h *Handler) DeleteRequestForDeliveryById(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	c.Redirect(http.StatusOK, "/home")
+	c.Redirect(http.StatusFound, "/home")
 }
 
 func (h *Handler) Ping(c *gin.Context) {

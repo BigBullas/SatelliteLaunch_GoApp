@@ -43,6 +43,9 @@ func (r *Repository) GetCardRequestForDeliveryByID(cardId int) (models.FlightReq
 }
 
 func (r *Repository) DeleteRequestForDeliveryById(cardId int) error {
-	r.db.Where("request_id = ? AND is_available = ?", cardId, true).Update("is_available", false)
+	err := r.db.Exec("UPDATE flight_requests SET is_available=false WHERE request_id = ?", cardId).Error
+	if err != nil {
+		return err
+	}
 	return nil
 }

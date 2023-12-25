@@ -66,15 +66,15 @@
                   Цена услуги: <span>{{ .DesiredPrice }} млн рублей</span>
                 </div>
               </div>
-            </div>
+            </div>                <input type="hidden" name="cardId" value="{{ .Id }}">
             <div class="card-btn_container">
               <form action="/card">
                 <input type="hidden" name="cardId" value="{{ .Id }}">
                 <input type="submit" value="Подробнее">
               </form>
-              <form action="/card/{{ .Id }}" method="post">
-                <input type="submit" value="Удалить">
-              </form>
+              <form action="http://localhost:8080/card/{{ .Id }}" method="post">
+                <button class="card-button">Удалить услугу</button>
+            </form>
             </div>
           </div>
         </div>
