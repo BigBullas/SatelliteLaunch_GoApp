@@ -30,7 +30,7 @@ func (h *Handler) StartServer() {
 
 	r.GET("/home", h.GetRequestForFlightList)
 	r.GET("/flight_request/:id", h.GetCardRequestForFlightById)
-	r.POST("/flight_request")
+	r.POST("/flight_request", h.CreateNewRequestForFlight)
 
 	r.POST("/flight_request/:id", h.DeleteRequestForFlightById)
 

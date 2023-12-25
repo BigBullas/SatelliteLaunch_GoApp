@@ -4,8 +4,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+
+	"RIP_lab1/internal/models"
 )
 
 func (h *Handler) GetRequestForFlightList(c *gin.Context) {
@@ -43,6 +46,89 @@ func (h *Handler) GetCardRequestForFlightById(c *gin.Context) {
 	c.HTML(http.StatusOK, "card_launch_vehicle.gohtml", gin.H{
 		"card": card,
 	})
+}
+
+func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
+	var newFlightRequest models.FlightRequest
+
+	// type FlightRequest struct {
+	// 	Id              int `gorm:"primarykey"`
+	// 	ImgURL          string
+	// 	Title           string
+	// 	LoadCapacity    float64
+	// 	Description     string N
+	// 	DetailedDesc    string N
+	// 	DesiredPrice    float64 N
+	// 	FlightDateStart time.Time
+	// 	FlightDateEnd   time.Time
+	// }
+
+	newFlightRequest.Title = c.Request.FormValue("title")
+	if newFlightRequest.Title == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Название КА не может быть пустым"})
+	}
+
+	_, _, err := c.Request.FormFile("image")
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+	newFlightRequest.ImgURL = "https://ntv-static.cdnvideo.ru/home/news/2023/20230205/sputn_io.jpg"
+
+	loadCapacity := c.Request.FormValue("load_capacity")
+	if loadCapacity != "" {
+		newFlightRequest.LoadCapacity, err = strconv.ParseFloat(loadCapacity, 64)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указан полезный вес КА"})
+			return
+		}
+	}
+
+	newFlightRequest.Description = c.Request.FormValue("description")
+	newFlightRequest.DetailedDesc = c.Request.FormValue("detailed_description")
+
+	desiredPrice := c.Request.FormValue("desired_price")
+	if desiredPrice != "" {
+		newFlightRequest.DesiredPrice, err = strconv.ParseFloat(desiredPrice, 64)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана желаемая цена услуги"})
+			return
+		}
+	}
+
+	startDate := c.Request.FormValue("flight_date_start")
+	if startDate == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "дата начала желаемого периода полёта не может быть пустой"})
+		return
+	}
+	newFlightRequest.FlightDateStart, err = time.Parse("2023-02-05 00:00:00", startDate)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата начала желаемого периода полёта"})
+		return
+	}
+
+	endDate := c.Request.FormValue("flight_date_end")
+	if endDate == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "дата конца желаемого периода полёта не может быть пустой"})
+		return
+	}
+	newFlightRequest.FlightDateEnd, err = time.Parse("2023-02-05 00:00:00", endDate)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата конца желаемого периода полёта"})
+		return
+	}
+
+	// if newFlightRequest.Image, err = h.minio.SaveImage(c.Request.Context(), file, header); err != nil {
+	// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "ошибка при сохранении изображения"})
+	// 	return
+	// }
+
+	// if err = h.repo.AddThreat(newFlightRequest); err != nil {
+	// 	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err})
+	// 	return
+	// }
+
+	c.JSON(http.StatusCreated, "Новая заявка на полёт успешно создана")
 }
 
 func (h *Handler) DeleteRequestForFlightById(c *gin.Context) {
