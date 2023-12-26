@@ -33,6 +33,7 @@ func (h *Handler) StartServer() {
 	r.POST("/flight_request", h.CreateNewRequestForFlight)
 	r.PUT("/flight_request/:id", h.ChangeRequestForFlight)
 	r.DELETE("/flight_request/:id", h.DeleteRequestForFlightById)
+	r.POST("/flight_request/rocket_flight", h.AddFlightRequestToFlight)
 
 	// удалить после перехода на фронт
 	r.POST("/flight_request/:id", h.DeleteRequestForFlightById)

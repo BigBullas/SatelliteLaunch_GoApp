@@ -8,4 +8,6 @@ type Repo interface {
 	CreateNewRequestForFlight(models.FlightRequest) error
 	ChangeRequestForFlight(models.FlightRequest) error
 	DeleteRequestForFlightById(cardId int) error
+
+	AddFlightRequestToFlight(models.ShortRocketFlight) error
 }

@@ -230,7 +230,7 @@ func (h *Handler) ChangeRequestForFlight(c *gin.Context) {
 	err = h.repo.ChangeRequestForFlight(changedFlightRequest)
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -242,10 +242,9 @@ func (h *Handler) DeleteRequestForFlightById(c *gin.Context) {
 	strCardId := c.Param("id")
 	cardId, err := strconv.Atoi(strCardId)
 	if err != nil {
-		log.Println("Ошибка при преобразовании строки в число:", err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
 	}
-
-	log.Println("HANDLER, id: ", cardId)
 
 	err = h.repo.DeleteRequestForFlightById(cardId)
 	if err != nil {
@@ -254,4 +253,29 @@ func (h *Handler) DeleteRequestForFlightById(c *gin.Context) {
 		return
 	}
 	c.Redirect(http.StatusFound, "/home")
+}
+
+func (h *Handler) AddFlightRequestToFlight(c *gin.Context) {
+	var shortFlight models.ShortRocketFlight
+
+	err := c.BindJSON(&shortFlight)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	shortFlight.CreatorId = 1
+
+	if shortFlight.RequestId == 0 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Требуется хотя бы одна заявка на полёт КА"})
+		return
+	}
+
+	err = h.repo.AddFlightRequestToFlight(shortFlight)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Заявка на полёт КА добавлена в планируемый полёт"})
+	return
 }
