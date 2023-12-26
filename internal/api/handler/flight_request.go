@@ -167,27 +167,11 @@ func (h *Handler) ChangeRequestForFlight(c *gin.Context) {
 	}
 	changedFlightRequest.RequestId = cardId
 
-	// type FlightRequest struct {
-	// 	Id              int `gorm:"primarykey"`
-	// 	ImgURL          string
-	// 	Title           string
-	// 	LoadCapacity    float64
-	// 	Description     string N
-	// 	DetailedDesc    string N
-	// 	DesiredPrice    float64 N
-	// 	FlightDateStart time.Time
-	// 	FlightDateEnd   time.Time
-	// }
-
 	changedFlightRequest.Title = c.Request.FormValue("title")
 
 	// log.Println("title", newFlightRequest.Title)
 
 	_, header, _ := c.Request.FormFile("image")
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
-	// 	return
-	// }
 	if header != nil && header.Size != 0 {
 		// delete old image
 		// add new image

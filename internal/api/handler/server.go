@@ -32,7 +32,9 @@ func (h *Handler) StartServer() {
 	r.GET("/flight_request/:id", h.GetCardRequestForFlightById)
 	r.POST("/flight_request", h.CreateNewRequestForFlight)
 	r.PUT("/flight_request/:id", h.ChangeRequestForFlight)
+	r.DELETE("/flight_request/:id", h.DeleteRequestForFlightById)
 
+	// удалить после перехода на фронт
 	r.POST("/flight_request/:id", h.DeleteRequestForFlightById)
 
 	err := r.Run(":8080")
