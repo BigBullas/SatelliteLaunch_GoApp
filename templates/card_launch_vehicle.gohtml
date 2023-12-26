@@ -27,7 +27,7 @@
 </div>
 <div class="under_header"></div>
 <div class="card_container__simple">
-<div id ="{{ .card.Id }}" class="card__detailed">
+<div id ="{{ .card.RequestId }}" class="card__detailed">
     <div class="card-img_container__detailed">
         <div class="card-img" style="background-image: url({{ .card.ImgURL }});"></div>
     </div>
@@ -36,7 +36,7 @@
             <form action="/home">
                 <input type="submit" value="Назад">
             </form>
-            <form action="http://localhost:8080/flight_request/{{ .card.Id }}" method="post">
+            <form action="http://localhost:8080/flight_request/{{ .card.RequestId }}" method="post">
                 <button class="card-button">Удалить услугу</button>
             </form>
         </div>

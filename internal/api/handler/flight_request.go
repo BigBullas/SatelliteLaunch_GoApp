@@ -137,6 +137,7 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 	// }
 
 	err = h.repo.CreateNewRequestForFlight(newFlightRequest)
+
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err})
 		return

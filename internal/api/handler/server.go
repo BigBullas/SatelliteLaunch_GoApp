@@ -34,7 +34,7 @@ func (h *Handler) StartServer() {
 
 	r.POST("/flight_request/:id", h.DeleteRequestForFlightById)
 
-	err := r.Run()
+	err := r.Run(":8080")
 	if err != nil {
 		log.Fatalln(err)
 	}

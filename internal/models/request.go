@@ -1,9 +1,11 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type FlightRequest struct {
-	Id              int `gorm:"primarykey"`
+	RequestId       int `gorm:"primarykey"`
 	ImgURL          string
 	Title           string
 	LoadCapacity    float64
