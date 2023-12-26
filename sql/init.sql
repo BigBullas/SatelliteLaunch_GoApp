@@ -1,51 +1,57 @@
-create table if not exists "users"
+drop table if exists "users" CASCADE;
+drop table if exists flight_requests CASCADE;
+drop table if exists rocket_flights CASCADE;
+drop table if exists flights_flight_requests CASCADE;
+
+create table "users"
 (
-    user_id         integer not null 
+    user_id         serial unique not null 
                     constraint user_pk primary key,
-    login           varchar(30),
-    password        varchar(30),
-    is_admin        boolean
+    login           varchar(40) not null,
+	email			varchar(40),
+    password        varchar(40) not null,
+    is_admin        boolean default false
 );
 
-create table if not exists rocket_flights
+create table rocket_flights
 (
-    flight_id       integer not null 
+    flight_id       serial unique not null 
                     constraint flight_pk primary key,
-    user_id         integer 
-                    constraint flight_creator_user_id_fk references "users",
+    creator_id      integer not null
+                    constraint flight_creator_user_id_fk references "users" (user_id),
     moderator_id    integer 
-                    constraint flight_moderator_user_id_fk references "users", 
-    status          varchar(20),
-    created_at      timestamp,
+                    constraint flight_moderator_user_id_fk references "users" (user_id), 
+    status          varchar(20) not null,
+    created_at      timestamp default now() not null,
     formed_at       timestamp,
     confirmed_at    timestamp,
     flight_date     timestamp,
     payload         integer,
     price           float,
     title           varchar(100),
-    site_number     integer
+    place_number     integer
 );
 
-create table if not exists flight_requests
+create table flight_requests
 (
-    request_id          	integer not null 
+    request_id          	SERIAL unique not null 
                         	constraint request_pk primary key,
-    is_available        	boolean,
-    img_url             	TEXT,
-    title               	varchar(100),
-    load_capacity       	float,
+    is_available        	boolean not null default false,
+    img_url             	TEXT not null,
+    title               	varchar(100) not null,
+    load_capacity       	float not null,
     description         	TEXT,
     detailed_desc		    TEXT,
     desired_price       	float,
-    flight_date_start   	timestamp,
-    flight_date_end     	timestamp
+    flight_date_start   	timestamp not null,
+    flight_date_end     	timestamp not null
 );
 
-create table if not exists flights_flight_requests
+create table flights_flight_requests
 (
     flight_id       integer 
                     constraint flight_request_flight_flight_id_fk references rocket_flights,
-    request_id      integer 
+    request_id      integer
                     constraint request_flight_request_request_id_fk references flight_requests,
                 primary key (flight_id, request_id)
 );

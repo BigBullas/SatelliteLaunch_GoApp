@@ -68,12 +68,16 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Название КА не может быть пустым"})
 	}
 
+	// log.Println("title", newFlightRequest.Title)
+
 	_, _, err := c.Request.FormFile("image")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 		return
 	}
 	newFlightRequest.ImgURL = "https://ntv-static.cdnvideo.ru/home/news/2023/20230205/sputn_io.jpg"
+
+	// log.Println("image", newFlightRequest.ImgURL)
 
 	loadCapacity := c.Request.FormValue("load_capacity")
 	if loadCapacity != "" {
@@ -84,8 +88,12 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 		}
 	}
 
+	// log.Println("load_capacity", newFlightRequest.LoadCapacity)
+
 	newFlightRequest.Description = c.Request.FormValue("description")
 	newFlightRequest.DetailedDesc = c.Request.FormValue("detailed_description")
+
+	// log.Println("descriptions: ", newFlightRequest.Description, newFlightRequest.DetailedDesc)
 
 	desiredPrice := c.Request.FormValue("desired_price")
 	if desiredPrice != "" {
@@ -96,12 +104,17 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 		}
 	}
 
+	// log.Println("desired price: ", newFlightRequest.DesiredPrice)
+
 	startDate := c.Request.FormValue("flight_date_start")
 	if startDate == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "дата начала желаемого периода полёта не может быть пустой"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Дата начала желаемого периода полёта не может быть пустой"})
 		return
 	}
-	newFlightRequest.FlightDateStart, err = time.Parse("2023-02-05 00:00:00", startDate)
+
+	// log.Println("start date: ", startDate)
+
+	newFlightRequest.FlightDateStart, err = time.Parse("2006-01-02 15:04:05", startDate)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата начала желаемого периода полёта"})
 		return
@@ -109,10 +122,10 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 
 	endDate := c.Request.FormValue("flight_date_end")
 	if endDate == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "дата конца желаемого периода полёта не может быть пустой"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Дата конца желаемого периода полёта не может быть пустой"})
 		return
 	}
-	newFlightRequest.FlightDateEnd, err = time.Parse("2023-02-05 00:00:00", endDate)
+	newFlightRequest.FlightDateEnd, err = time.Parse("2006-01-02 15:04:05", endDate)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата конца желаемого периода полёта"})
 		return
@@ -123,10 +136,11 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 	// 	return
 	// }
 
-	// if err = h.repo.AddThreat(newFlightRequest); err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err})
-	// 	return
-	// }
+	err = h.repo.CreateNewRequestForFlight(newFlightRequest)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err})
+		return
+	}
 
 	c.JSON(http.StatusCreated, "Новая заявка на полёт успешно создана")
 }

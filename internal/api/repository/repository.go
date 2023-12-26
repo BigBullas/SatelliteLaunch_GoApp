@@ -42,6 +42,11 @@ func (r *Repository) GetCardRequestForFlightById(cardId int) (models.FlightReque
 	return card, nil
 }
 
+func (r *Repository) CreateNewRequestForFlight(newFlightRequest models.FlightRequest) error {
+	result := r.db.Create(&newFlightRequest)
+	return result.Error
+}
+
 func (r *Repository) DeleteRequestForFlightById(cardId int) error {
 	err := r.db.Exec("UPDATE flight_requests SET is_available=false WHERE request_id = ?", cardId).Error
 	if err != nil {
