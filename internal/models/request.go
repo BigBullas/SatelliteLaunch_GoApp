@@ -6,6 +6,7 @@ import (
 
 type FlightRequest struct {
 	RequestId       int `gorm:"primarykey"`
+	IsAvailable     bool
 	ImgURL          string
 	Title           string
 	LoadCapacity    float64

@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
@@ -44,6 +46,49 @@ func (r *Repository) GetCardRequestForFlightById(cardId int) (models.FlightReque
 
 func (r *Repository) CreateNewRequestForFlight(newFlightRequest models.FlightRequest) error {
 	result := r.db.Create(&newFlightRequest)
+	return result.Error
+}
+
+func (r *Repository) ChangeRequestForFlight(changedFlightRequest models.FlightRequest) error {
+	var oldFlightRequest models.FlightRequest
+	result := r.db.First(&oldFlightRequest, "request_id =?", changedFlightRequest.RequestId)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if changedFlightRequest.Title != "" {
+		oldFlightRequest.Title = changedFlightRequest.Title
+	}
+
+	if changedFlightRequest.Description != "" {
+		oldFlightRequest.Description = changedFlightRequest.Description
+	}
+
+	if changedFlightRequest.DetailedDesc != "" {
+		oldFlightRequest.DetailedDesc = changedFlightRequest.DetailedDesc
+	}
+
+	if changedFlightRequest.DesiredPrice != 0.0 {
+		oldFlightRequest.DesiredPrice = changedFlightRequest.DesiredPrice
+	}
+
+	if changedFlightRequest.LoadCapacity != 0.0 {
+		oldFlightRequest.LoadCapacity = changedFlightRequest.LoadCapacity
+	}
+
+	if changedFlightRequest.ImgURL != "" {
+		oldFlightRequest.ImgURL = changedFlightRequest.ImgURL
+	}
+
+	if changedFlightRequest.FlightDateStart != (time.Time{}) {
+		oldFlightRequest.FlightDateStart = changedFlightRequest.FlightDateStart
+	}
+
+	if changedFlightRequest.FlightDateEnd != (time.Time{}) {
+		oldFlightRequest.FlightDateEnd = changedFlightRequest.FlightDateEnd
+	}
+
+	result = r.db.Save(oldFlightRequest)
 	return result.Error
 }
 
