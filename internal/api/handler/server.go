@@ -46,6 +46,7 @@ func (h *Handler) StartServer() {
 	r.PUT("/rocket_flight", h.ChangeRocketFlight)
 	r.PUT("/rocket_flight/form", h.FormRocketFlight)
 	r.PUT("/rocket_flight/:id/response", h.ResponceRocketFlight)
+	r.DELETE("/rocket_flight1", h.DeleteRocketFlight)
 
 	err := r.Run(":8080")
 	if err != nil {

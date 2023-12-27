@@ -186,3 +186,15 @@ func (r *Repository) ResponceRocketFlight(newFlightStatus models.RocketFlight) e
 	res := r.db.Save(&rocketFlight)
 	return res.Error
 }
+
+func (r *Repository) DeleteRocketFlight(userId int) error {
+	var rocketFlight models.RocketFlight
+	result := r.db.First(&rocketFlight, "creator_id =? and status = 'draft'", userId)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	rocketFlight.Status = "deleted"
+	result = r.db.Save(rocketFlight)
+	return result.Error
+}

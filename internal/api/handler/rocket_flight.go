@@ -138,3 +138,13 @@ func (h *Handler) ResponceRocketFlight(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Статус заявки успешно изменен"})
 	return
 }
+
+func (h *Handler) DeleteRocketFlight(c *gin.Context) {
+	userId := 1
+	err := h.repo.DeleteRocketFlight(userId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Заявка-черновик успешно удалена"})
+}

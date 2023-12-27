@@ -20,4 +20,5 @@ type Repo interface {
 	ChangeRocketFlight(models.RocketFlightChangeable) error
 	FormRocketFlight(models.RocketFlight) error
 	ResponceRocketFlight(models.RocketFlight) error
+	DeleteRocketFlight(int) error
 }
