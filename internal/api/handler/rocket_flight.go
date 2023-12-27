@@ -49,6 +49,7 @@ func (h *Handler) GetRocketFlightList(c *gin.Context) {
 	c.JSON(http.StatusOK, rocketFlights)
 }
 
+
 func (h *Handler) GetRocketFlightById(c *gin.Context) {
 	strFlightId := c.Param("id")
 	flightId, err := strconv.Atoi(strFlightId)
@@ -84,3 +85,29 @@ func (h *Handler) ChangeRocketFlight(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Информация о полёте успешно изменена"})
 }
+
+func (h *Handler) FormRocketFlight(c *gin.Context) {
+	var newFlightStatus models.RocketFlight
+	err := c.BindJSON(&newFlightStatus)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if newFlightStatus.Status != "formed" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Поменять статус можно только на 'formed'"})
+		return
+	}
+
+	newFlightStatus.CreatorId = 1
+
+	err = h.repo.FormRocketFlight(newFlightStatus)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Статус успешно изменен на 'formed'"})
+}
+
+func (h *Handler) ResponceRocketFlight(c *gin.Context)

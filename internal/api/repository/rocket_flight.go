@@ -3,6 +3,8 @@ package repository
 import (
 	"RIP_lab1/internal/models"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd time.Time, status string) ([]models.RocketFlight, error) {
@@ -55,6 +57,16 @@ func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd ti
 	res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).
 		Where("formed_at BETWEEN ? AND ?", formDateStart, formDateEnd).Find(&rocketFlights)
 	return rocketFlights, res.Error
+}
+
+func (r *Repository) GetRocketFlightDraft(userId int) (int, error) {
+	var rocketFlight models.RocketFlight
+	err := r.db.First(&rocketFlight, "creator_id = ? and status = 'draft'", userId)
+	if err.Error != nil && err.Error != gorm.ErrRecordNotFound {
+		return 0, err.Error
+	}
+
+	return rocketFlight.FlightId, nil
 }
 
 func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlightDetailed, []models.FlightRequest, error) {
@@ -111,7 +123,7 @@ func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlightDetai
 }
 
 func (r *Repository) ChangeRocketFlight(changedRocketFlight models.RocketFlightChangeable) error {
-	var oldRocketFlight models.RocketFlightChangeable
+	var oldRocketFlight models.RocketFlight
 	result := r.db.Table("rocket_flights").Where("creator_id = ? AND status = ?", changedRocketFlight.CreatorId, "draft").Find(&oldRocketFlight)
 	if result.Error != nil {
 		return result.Error
@@ -138,5 +150,20 @@ func (r *Repository) ChangeRocketFlight(changedRocketFlight models.RocketFlightC
 	}
 
 	result = r.db.Save(oldRocketFlight)
+	return result.Error
+}
+
+func (r *Repository) FormRocketFlight(newRocketStatus models.RocketFlight) error {
+	var rocketFlight models.RocketFlight
+	err := r.db.First(&rocketFlight, "creator_id = ? and status = 'draft'", newRocketStatus.CreatorId)
+	if err.Error != nil {
+		return err.Error
+	}
+
+	rocketFlight.Status = newRocketStatus.Status
+	rocketFlight.FormedAt = time.Now()
+
+	result := r.db.Save(&rocketFlight)
+
 	return result.Error
 }

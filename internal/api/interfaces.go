@@ -15,6 +15,8 @@ type Repo interface {
 	AddFlightRequestToFlight(models.RocketFlightShort) error
 
 	GetRocketFlightList(time.Time, time.Time, string) ([]models.RocketFlight, error)
+	GetRocketFlightDraft(int) (int, error)
 	GetRocketFlightById(int) (models.RocketFlightDetailed, []models.FlightRequest, error)
 	ChangeRocketFlight(models.RocketFlightChangeable) error
+	FormRocketFlight(models.RocketFlight) error
 }

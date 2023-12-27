@@ -20,10 +20,31 @@ func (h *Handler) GetRequestForFlightList(c *gin.Context) {
 		log.Println(err)
 	}
 
-	c.HTML(http.StatusOK, "index.gohtml", gin.H{
-		"cards":           data,
-		"space_satellite": strSearch,
-	})
+	flightId, err := h.repo.GetRocketFlightDraft(1)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	// if flightId == 0 {
+	// 	c.HTML(http.StatusOK, "index.gohtml", gin.H{
+	// 		"cards":           data,
+	// 		"space_satellite": strSearch,
+	// 	})
+	// 	return
+	// }
+
+	// c.HTML(http.StatusOK, "index.gohtml", gin.H{
+	// 	"cards":               data,
+	// 	"space_satellite":     strSearch,
+	// 	"draftRocketFlightId": flightId,
+	// })
+
+	if flightId == 0 {
+		c.JSON(http.StatusOK, gin.H{"flight_requests": data})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"flight_requests": data, "draftRocketFlightId": flightId})
 }
 
 func (h *Handler) GetCardRequestForFlightById(c *gin.Context) {
