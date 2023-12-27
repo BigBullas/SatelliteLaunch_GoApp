@@ -1,6 +1,7 @@
 package models
 
 type FlightsFlightRequest struct {
-	FlightId  int
-	RequestId int
+	FlightId        int
+	RequestId       int
+	CountSatellites int
 }

@@ -50,6 +50,7 @@ func (h *Handler) StartServer() {
 
 	// m-m
 	r.DELETE("/flights_flight_requests/flight_request/:id", h.DeleteRequestFromFlight)
+	r.PUT("/flights_flight_requests/flight_request/:id/count/:count", h.ChangeCountFlightsFlightRequest)
 
 	err := r.Run(":8080")
 	if err != nil {

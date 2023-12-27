@@ -133,3 +133,30 @@ func (r *Repository) DeleteRequestFromFlight(userId int, requestId int) error {
 
 	return nil
 }
+
+func (r *Repository) ChangeCountFlightsFlightRequest(userId int, requestId int, count int) error {
+	var rocketFlight models.RocketFlight
+	r.db.Where("creator_id = ? and status = 'draft'", userId).First(&rocketFlight)
+
+	if rocketFlight.FlightId == 0 {
+		return errors.New("Нет заявки-черновика на полёт ракеты-носителя")
+	}
+
+	var flightsFlightRequest models.FlightsFlightRequest
+	err := r.db.Where("flight_id = ? AND request_id = ?", rocketFlight.FlightId, requestId).First(&flightsFlightRequest).Error
+	if err != nil {
+		return errors.New("Такой заявки нет в данном планируемом полёте")
+	}
+
+	flightsFlightRequest.CountSatellites += count
+	if flightsFlightRequest.CountSatellites < 1 {
+		return errors.New("Количество заявок на полёт данного КА меньше, чем изменение количества спутников")
+	}
+
+	err = r.db.Where("flight_id = ? AND request_id = ?", rocketFlight.FlightId, requestId).Save(flightsFlightRequest).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

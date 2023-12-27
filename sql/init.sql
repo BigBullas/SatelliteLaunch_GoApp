@@ -53,7 +53,9 @@ create table flights_flight_requests
                     constraint flight_request_flight_flight_id_fk references rocket_flights,
     request_id      integer
                     constraint request_flight_request_request_id_fk references flight_requests,
-                primary key (flight_id, request_id)
+                primary key (flight_id, request_id),
+	count_satellites integer default 1
+
 );
 
 alter table "users" owner to admin;
