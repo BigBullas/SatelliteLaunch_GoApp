@@ -13,6 +13,7 @@ type Repo interface {
 	DeleteRequestForFlightById(cardId int) error
 
 	AddFlightRequestToFlight(models.RocketFlightShort) error
+	DeleteRequestFromFlight(int, int) error
 
 	GetRocketFlightList(time.Time, time.Time, string) ([]models.RocketFlight, error)
 	GetRocketFlightDraft(int) (int, error)

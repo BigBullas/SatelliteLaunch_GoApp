@@ -284,3 +284,21 @@ func (h *Handler) AddFlightRequestToFlight(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Заявка на полёт КА добавлена в планируемый полёт"})
 	return
 }
+
+func (h *Handler) DeleteRequestFromFlight(c *gin.Context) {
+	strRequestId := c.Param("id")
+	requestId, err := strconv.Atoi(strRequestId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	userId := 1
+
+	err = h.repo.DeleteRequestFromFlight(userId, requestId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Заявка на полёт КА успешно удалена из планируемого полёта"})
+}

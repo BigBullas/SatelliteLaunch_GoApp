@@ -34,9 +34,6 @@ func (h *Handler) StartServer() {
 	r.PUT("/flight_request/:id", h.ChangeRequestForFlight)
 	r.DELETE("/flight_request/:id", h.DeleteRequestForFlightById)
 
-	// формирование информации о будущем полёте через заявки на полёт
-	r.POST("/flight_request/rocket_flight", h.AddFlightRequestToFlight)
-
 	// удалить после перехода на фронт
 	r.POST("/flight_request/:id", h.DeleteRequestForFlightById)
 
@@ -46,7 +43,13 @@ func (h *Handler) StartServer() {
 	r.PUT("/rocket_flight", h.ChangeRocketFlight)
 	r.PUT("/rocket_flight/form", h.FormRocketFlight)
 	r.PUT("/rocket_flight/:id/response", h.ResponceRocketFlight)
-	r.DELETE("/rocket_flight1", h.DeleteRocketFlight)
+	r.DELETE("/rocket_flights", h.DeleteRocketFlight)
+
+	// формирование информации о будущем полёте через заявки на полёт
+	r.POST("/flight_request/rocket_flight", h.AddFlightRequestToFlight)
+
+	// m-m
+	r.DELETE("/flights_flight_requests/flight_request/:id", h.DeleteRequestFromFlight)
 
 	err := r.Run(":8080")
 	if err != nil {
