@@ -2,6 +2,7 @@ package repository
 
 import (
 	"RIP_lab1/internal/models"
+	"errors"
 	"fmt"
 	"time"
 
@@ -174,7 +175,7 @@ func (r *Repository) ResponceRocketFlight(newFlightStatus models.RocketFlight) e
 
 	err := r.db.First(&rocketFlight, "flight_id = ? and status = 'formed'", newFlightStatus.FlightId)
 	if err.Error != nil && err.Error.Error() == "record not found" {
-		return fmt.Errorf("Такой заявки-черновика на полёт ракеты-носителя нет")
+		return fmt.Errorf("Такой сформированной заявки на полёт ракеты-носителя нет")
 	}
 	if err.Error != nil {
 		return err.Error
@@ -190,6 +191,9 @@ func (r *Repository) ResponceRocketFlight(newFlightStatus models.RocketFlight) e
 func (r *Repository) DeleteRocketFlight(userId int) error {
 	var rocketFlight models.RocketFlight
 	result := r.db.First(&rocketFlight, "creator_id =? and status = 'draft'", userId)
+	if result.Error != nil && result.Error.Error() == "record not found" {
+		return errors.New("Заявки-черновика на полёт ракеты-носителя нет")
+	}
 	if result.Error != nil {
 		return result.Error
 	}

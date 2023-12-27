@@ -28,25 +28,25 @@ func (h *Handler) StartServer() {
 	r.Static("/image", "./resources")
 	r.Static("/style", "./style")
 	// заявки на полёт
-	r.GET("/home", h.GetRequestForFlightList)
-	r.GET("/flight_request/:id", h.GetCardRequestForFlightById)
-	r.POST("/flight_request", h.CreateNewRequestForFlight)
-	r.PUT("/flight_request/:id", h.ChangeRequestForFlight)
-	r.DELETE("/flight_request/:id", h.DeleteRequestForFlightById)
+	r.GET("/flight_requests", h.GetRequestForFlightList)
+	r.GET("/flight_requests/:id", h.GetCardRequestForFlightById)
+	r.POST("/flight_requests", h.CreateNewRequestForFlight)
+	r.PUT("/flight_requests/:id", h.ChangeRequestForFlight)
+	r.DELETE("/flight_requests/:id", h.DeleteRequestForFlightById)
 
 	// удалить после перехода на фронт
 	r.POST("/flight_request/:id", h.DeleteRequestForFlightById)
 
 	// полёты ракет-носителей
 	r.GET("/rocket_flights", h.GetRocketFlightList)
-	r.GET("/rocket_flight/:id", h.GetRocketFlightById)
-	r.PUT("/rocket_flight", h.ChangeRocketFlight)
-	r.PUT("/rocket_flight/form", h.FormRocketFlight)
-	r.PUT("/rocket_flight/:id/response", h.ResponceRocketFlight)
+	r.GET("/rocket_flights/:id", h.GetRocketFlightById)
+	r.PUT("/rocket_flights", h.ChangeRocketFlight)
+	r.PUT("/rocket_flights/form", h.FormRocketFlight)
+	r.PUT("/rocket_flights/:id/response", h.ResponceRocketFlight)
 	r.DELETE("/rocket_flights", h.DeleteRocketFlight)
 
 	// формирование информации о будущем полёте через заявки на полёт
-	r.POST("/flight_request/rocket_flight", h.AddFlightRequestToFlight)
+	r.POST("/flight_requests/rocket_flight", h.AddFlightRequestToFlight)
 
 	// m-m
 	r.DELETE("/flights_flight_requests/flight_request/:id", h.DeleteRequestFromFlight)
