@@ -57,15 +57,45 @@ func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd ti
 	return rocketFlights, res.Error
 }
 
-func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlight, []models.FlightRequest, error) {
+func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlightDetailed, []models.FlightRequest, error) {
 	var rocketFlight models.RocketFlight
+	// var rocketFlightDetailed models.RocketFlightDetailed
 	var flightRequests []models.FlightRequest
 
 	//информация по данному полёту
 	result := r.db.First(&rocketFlight, "flight_id =?", flightId)
 	if result.Error != nil {
 		// log.Println("Ошибка при получении данного полёта")
-		return models.RocketFlight{}, []models.FlightRequest{}, result.Error
+		return models.RocketFlightDetailed{}, []models.FlightRequest{}, result.Error
+	}
+
+	var creator models.UserShort
+	result = r.db.Table("users").Select("login").Where("user_id = ?", 1).First(&creator)
+	if result.Error != nil {
+		// log.Println("Ошибка при получении данного полёта")
+		return models.RocketFlightDetailed{}, []models.FlightRequest{}, result.Error
+	}
+
+	var moderator models.UserShort
+	result = r.db.Table("users").Select("login").Where("user_id = ?", 2).First(&moderator)
+	if result.Error != nil {
+		// log.Println("Ошибка при получении данного полёта")
+		return models.RocketFlightDetailed{}, []models.FlightRequest{}, result.Error
+	}
+
+	rocketFlightDetailed := models.RocketFlightDetailed{
+		FlightId:       rocketFlight.FlightId,
+		CreatorLogin:   creator.Login,
+		ModeratorLogin: moderator.Login,
+		Status:         rocketFlight.Status,
+		CreatedAt:      rocketFlight.CreatedAt,
+		FormedAt:       rocketFlight.FormedAt,
+		ConfirmedAt:    rocketFlight.ConfirmedAt,
+		FlightDate:     rocketFlight.FlightDate,
+		Payload:        rocketFlight.Payload,
+		Price:          rocketFlight.Price,
+		Title:          rocketFlight.Title,
+		PlaceNumber:    rocketFlight.PlaceNumber,
 	}
 
 	//заявки на полёт КА, принятые на данный полёт
@@ -74,8 +104,8 @@ func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlight, []m
 		Where("flights_flight_requests.flight_id = ?", flightId).Find(&flightRequests)
 	if result.Error != nil {
 		// log.Println("Ошибка при получении заявок на полёт КА по данному полёту")
-		return models.RocketFlight{}, []models.FlightRequest{}, result.Error
+		return models.RocketFlightDetailed{}, []models.FlightRequest{}, result.Error
 	}
 
-	return rocketFlight, flightRequests, nil
+	return rocketFlightDetailed, flightRequests, nil
 }

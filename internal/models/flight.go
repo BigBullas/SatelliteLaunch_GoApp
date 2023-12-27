@@ -17,6 +17,21 @@ type RocketFlight struct {
 	PlaceNumber int
 }
 
+type RocketFlightDetailed struct {
+	FlightId       int `gorm:"primarykey"`
+	CreatorLogin   string
+	ModeratorLogin string
+	Status         string
+	CreatedAt      time.Time
+	FormedAt       time.Time
+	ConfirmedAt    time.Time
+	FlightDate     time.Time
+	Payload        int
+	Price          float64
+	Title          string
+	PlaceNumber    int
+}
+
 type ShortRocketFlight struct {
 	CreatorId int
 	RequestId int
