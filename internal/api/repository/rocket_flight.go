@@ -2,6 +2,7 @@ package repository
 
 import (
 	"RIP_lab1/internal/models"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -166,4 +167,22 @@ func (r *Repository) FormRocketFlight(newRocketStatus models.RocketFlight) error
 	result := r.db.Save(&rocketFlight)
 
 	return result.Error
+}
+
+func (r *Repository) ResponceRocketFlight(newFlightStatus models.RocketFlight) error {
+	var rocketFlight models.RocketFlight
+
+	err := r.db.First(&rocketFlight, "flight_id = ? and status = 'formed'", newFlightStatus.FlightId)
+	if err.Error != nil && err.Error.Error() == "record not found" {
+		return fmt.Errorf("Такой заявки-черновика на полёт ракеты-носителя нет")
+	}
+	if err.Error != nil {
+		return err.Error
+	}
+
+	rocketFlight.Status = newFlightStatus.Status
+	rocketFlight.ModeratorId = newFlightStatus.ModeratorId
+
+	res := r.db.Save(&rocketFlight)
+	return res.Error
 }

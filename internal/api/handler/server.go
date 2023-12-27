@@ -45,7 +45,7 @@ func (h *Handler) StartServer() {
 	r.GET("/rocket_flight/:id", h.GetRocketFlightById)
 	r.PUT("/rocket_flight", h.ChangeRocketFlight)
 	r.PUT("/rocket_flight/form", h.FormRocketFlight)
-	r.PUT("/rocket_flight/:id/responce", h.ResponceRocketFlight)
+	r.PUT("/rocket_flight/:id/response", h.ResponceRocketFlight)
 
 	err := r.Run(":8080")
 	if err != nil {
