@@ -1,6 +1,9 @@
 package api
 
-import "RIP_lab1/internal/models"
+import (
+	"RIP_lab1/internal/models"
+	"time"
+)
 
 type Repo interface {
 	GetRequestForFlightList(substring string) ([]models.FlightRequest, error)
@@ -10,4 +13,6 @@ type Repo interface {
 	DeleteRequestForFlightById(cardId int) error
 
 	AddFlightRequestToFlight(models.ShortRocketFlight) error
+
+	GetRocketFlightList(time.Time, time.Time, string) ([]models.RocketFlight, error)
 }

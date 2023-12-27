@@ -38,6 +38,8 @@ func (h *Handler) StartServer() {
 	// удалить после перехода на фронт
 	r.POST("/flight_request/:id", h.DeleteRequestForFlightById)
 
+	r.GET("/rocket_flights", h.GetRocketFlightList)
+
 	err := r.Run(":8080")
 	if err != nil {
 		log.Fatalln(err)
