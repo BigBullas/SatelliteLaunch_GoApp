@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -44,4 +45,21 @@ func (h *Handler) GetRocketFlightList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, rocketFlights)
+}
+
+func (h *Handler) GetRocketFlightById(c *gin.Context) {
+	strFlightId := c.Param("id")
+	flightId, err := strconv.Atoi(strFlightId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Ошибка при преобразовании id полёта в число"})
+		return
+	}
+
+	rocket_flight, flight_requests, err := h.repo.GetRocketFlightById(flightId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, err)
+		return
+	}
+	
+	c.JSON(http.StatusOK, gin.H{"rocket_flight": rocket_flight, "flight_requests": flight_requests})
 }

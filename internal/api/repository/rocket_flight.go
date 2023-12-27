@@ -56,3 +56,26 @@ func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd ti
 		Where("formed_at BETWEEN ? AND ?", formDateStart, formDateEnd).Find(&rocketFlights)
 	return rocketFlights, res.Error
 }
+
+func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlight, []models.FlightRequest, error) {
+	var rocketFlight models.RocketFlight
+	var flightRequests []models.FlightRequest
+
+	//информация по данному полёту
+	result := r.db.First(&rocketFlight, "flight_id =?", flightId)
+	if result.Error != nil {
+		// log.Println("Ошибка при получении данного полёта")
+		return models.RocketFlight{}, []models.FlightRequest{}, result.Error
+	}
+
+	//заявки на полёт КА, принятые на данный полёт
+	result = r.db.Table("flights_flight_requests").Select("flight_requests.*").
+		Joins("JOIN flight_requests ON flights_flight_requests.request_id = flight_requests.request_id").
+		Where("flights_flight_requests.flight_id = ?", flightId).Find(&flightRequests)
+	if result.Error != nil {
+		// log.Println("Ошибка при получении заявок на полёт КА по данному полёту")
+		return models.RocketFlight{}, []models.FlightRequest{}, result.Error
+	}
+
+	return rocketFlight, flightRequests, nil
+}

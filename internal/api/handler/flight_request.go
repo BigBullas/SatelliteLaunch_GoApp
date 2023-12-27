@@ -27,10 +27,6 @@ func (h *Handler) GetRequestForFlightList(c *gin.Context) {
 }
 
 func (h *Handler) GetCardRequestForFlightById(c *gin.Context) {
-	// queryString := c.Request.URL.Query() // queryString - это тип url.Values, который содержит все query параметры
-
-	// strCardId := queryString.Get("id") // Получение значения конкретного параметра по его имени
-
 	strCardId := c.Param("id")
 	cardId, err := strconv.Atoi(strCardId)
 	if err != nil {
@@ -50,18 +46,6 @@ func (h *Handler) GetCardRequestForFlightById(c *gin.Context) {
 
 func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 	var newFlightRequest models.FlightRequest
-
-	// type FlightRequest struct {
-	// 	Id              int `gorm:"primarykey"`
-	// 	ImgURL          string
-	// 	Title           string
-	// 	LoadCapacity    float64
-	// 	Description     string N
-	// 	DetailedDesc    string N
-	// 	DesiredPrice    float64 N
-	// 	FlightDateStart time.Time
-	// 	FlightDateEnd   time.Time
-	// }
 
 	newFlightRequest.Title = c.Request.FormValue("title")
 	if newFlightRequest.Title == "" {
