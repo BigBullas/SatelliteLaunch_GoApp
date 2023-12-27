@@ -12,8 +12,9 @@ type Repo interface {
 	ChangeRequestForFlight(models.FlightRequest) error
 	DeleteRequestForFlightById(cardId int) error
 
-	AddFlightRequestToFlight(models.ShortRocketFlight) error
+	AddFlightRequestToFlight(models.RocketFlightShort) error
 
 	GetRocketFlightList(time.Time, time.Time, string) ([]models.RocketFlight, error)
 	GetRocketFlightById(int) (models.RocketFlightDetailed, []models.FlightRequest, error)
+	ChangeRocketFlight(models.RocketFlightChangeable) error
 }

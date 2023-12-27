@@ -77,7 +77,7 @@ func (r *Repository) DeleteRequestForFlightById(cardId int) error {
 	return nil
 }
 
-func (r *Repository) AddFlightRequestToFlight(shortFlight models.ShortRocketFlight) error {
+func (r *Repository) AddFlightRequestToFlight(shortFlight models.RocketFlightShort) error {
 	var rocketFlight models.RocketFlight
 
 	r.db.Where("creator_id = ?", shortFlight.CreatorId).Where("status = ?", "draft").First(&rocketFlight)

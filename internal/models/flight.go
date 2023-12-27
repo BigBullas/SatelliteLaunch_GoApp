@@ -32,7 +32,16 @@ type RocketFlightDetailed struct {
 	PlaceNumber    int
 }
 
-type ShortRocketFlight struct {
+type RocketFlightShort struct {
 	CreatorId int
 	RequestId int
+}
+
+type RocketFlightChangeable struct {
+	CreatorId   int
+	FlightDate  time.Time
+	Payload     int
+	Price       float64
+	Title       string
+	PlaceNumber int
 }

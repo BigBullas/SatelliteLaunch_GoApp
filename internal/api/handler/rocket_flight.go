@@ -6,13 +6,15 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
+	"RIP_lab1/internal/models"
 )
 
 func (h *Handler) GetRocketFlightList(c *gin.Context) {
-	queryString := c.Request.URL.Query()                   
-	strFormDateStart := queryString.Get("form_date_start") 
-	strFormDateEnd := queryString.Get("form_date_end")     
-	strStatus := queryString.Get("status")                 
+	queryString := c.Request.URL.Query()
+	strFormDateStart := queryString.Get("form_date_start")
+	strFormDateEnd := queryString.Get("form_date_end")
+	strStatus := queryString.Get("status")
 
 	var formDateStart, formDateEnd time.Time
 	var err error
@@ -60,6 +62,25 @@ func (h *Handler) GetRocketFlightById(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, err)
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{"rocket_flight": rocket_flight, "flight_requests": flight_requests})
+}
+
+func (h *Handler) ChangeRocketFlight(c *gin.Context) {
+	var newRocketFlight models.RocketFlightChangeable
+	err := c.BindJSON(&newRocketFlight)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	newRocketFlight.CreatorId = 1
+
+	err = h.repo.ChangeRocketFlight(newRocketFlight)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Информация о полёте успешно изменена"})
 }

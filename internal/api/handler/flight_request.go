@@ -240,7 +240,7 @@ func (h *Handler) DeleteRequestForFlightById(c *gin.Context) {
 }
 
 func (h *Handler) AddFlightRequestToFlight(c *gin.Context) {
-	var shortFlight models.ShortRocketFlight
+	var shortFlight models.RocketFlightShort
 
 	err := c.BindJSON(&shortFlight)
 	if err != nil {

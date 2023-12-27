@@ -27,19 +27,23 @@ func (h *Handler) StartServer() {
 
 	r.Static("/image", "./resources")
 	r.Static("/style", "./style")
-
+	// заявки на полёт
 	r.GET("/home", h.GetRequestForFlightList)
 	r.GET("/flight_request/:id", h.GetCardRequestForFlightById)
 	r.POST("/flight_request", h.CreateNewRequestForFlight)
 	r.PUT("/flight_request/:id", h.ChangeRequestForFlight)
 	r.DELETE("/flight_request/:id", h.DeleteRequestForFlightById)
+
+	// формирование информации о будущем полёте через заявки на полёт
 	r.POST("/flight_request/rocket_flight", h.AddFlightRequestToFlight)
 
 	// удалить после перехода на фронт
 	r.POST("/flight_request/:id", h.DeleteRequestForFlightById)
 
+	// полёты ракет-носителей
 	r.GET("/rocket_flights", h.GetRocketFlightList)
 	r.GET("/rocket_flight/:id", h.GetRocketFlightById)
+	r.PUT("/rocket_flight/:id", h.ChangeRocketFlight)
 
 	err := r.Run(":8080")
 	if err != nil {

@@ -109,3 +109,34 @@ func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlightDetai
 
 	return rocketFlightDetailed, flightRequests, nil
 }
+
+func (r *Repository) ChangeRocketFlight(changedRocketFlight models.RocketFlightChangeable) error {
+	var oldRocketFlight models.RocketFlightChangeable
+	result := r.db.Table("rocket_flights").Where("creator_id = ? AND status = ?", changedRocketFlight.CreatorId, "draft").Find(&oldRocketFlight)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if !changedRocketFlight.FlightDate.IsZero() {
+		oldRocketFlight.FlightDate = changedRocketFlight.FlightDate
+	}
+
+	if changedRocketFlight.Payload != 0 {
+		oldRocketFlight.Payload = changedRocketFlight.Payload
+	}
+
+	if changedRocketFlight.Price != 0.0 {
+		oldRocketFlight.Price = changedRocketFlight.Price
+	}
+
+	if changedRocketFlight.Title != "" {
+		oldRocketFlight.Title = changedRocketFlight.Title
+	}
+
+	if changedRocketFlight.PlaceNumber != 0 {
+		oldRocketFlight.PlaceNumber = changedRocketFlight.PlaceNumber
+	}
+
+	result = r.db.Save(oldRocketFlight)
+	return result.Error
+}
