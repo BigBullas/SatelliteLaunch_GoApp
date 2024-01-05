@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"RIP_lab1/internal/models"
+	"RIP_lab1/internal/utils"
 )
 
 func (h *Handler) GetRequestForFlightList(c *gin.Context) {
@@ -26,25 +27,25 @@ func (h *Handler) GetRequestForFlightList(c *gin.Context) {
 		return
 	}
 
-	// if flightId == 0 {
-	// 	c.HTML(http.StatusOK, "index.gohtml", gin.H{
-	// 		"cards":           data,
-	// 		"space_satellite": strSearch,
-	// 	})
-	// 	return
-	// }
-
-	// c.HTML(http.StatusOK, "index.gohtml", gin.H{
-	// 	"cards":               data,
-	// 	"space_satellite":     strSearch,
-	// 	"draftRocketFlightId": flightId,
-	// })
-
 	if flightId == 0 {
-		c.JSON(http.StatusOK, gin.H{"flight_requests": data})
+		c.HTML(http.StatusOK, "index.gohtml", gin.H{
+			"cards":           data,
+			"space_satellite": strSearch,
+		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"flight_requests": data, "draftRocketFlightId": flightId})
+
+	c.HTML(http.StatusOK, "index.gohtml", gin.H{
+		"cards":               data,
+		"space_satellite":     strSearch,
+		"draftRocketFlightId": flightId,
+	})
+
+// 	if flightId == 0 {
+// 		c.JSON(http.StatusOK, gin.H{"flight_requests": data})
+// 		return
+// 	}
+// 	c.JSON(http.StatusOK, gin.H{"flight_requests": data, "draftRocketFlightId": flightId})
 }
 
 func (h *Handler) GetCardRequestForFlightById(c *gin.Context) {
@@ -76,16 +77,17 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 
 	// log.Println("title", newFlightRequest.Title)
 
-	_, header, err := c.Request.FormFile("image")
+	file, header, err := c.Request.FormFile("image")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 		return
 	}
-	if header == nil || header.Size == 0 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Не было выслано изображение"})
-		return
-	}
-	newFlightRequest.ImgURL = "https://ntv-static.cdnvideo.ru/home/news/2023/20230205/sputn_io.jpg"
+
+	// if header == nil || header.Size == 0 {
+	// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Не было выслано изображение"})
+	// 	return
+	// }
+	// newFlightRequest.ImgURL = "https://ntv-static.cdnvideo.ru/home/news/2023/20230205/sputn_io.jpg"
 
 	// log.Println("image", newFlightRequest.ImgURL)
 
@@ -146,10 +148,11 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 
 	newFlightRequest.IsAvailable = true
 
-	// if newFlightRequest.Image, err = h.minio.SaveImage(c.Request.Context(), file, header); err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "ошибка при сохранении изображения"})
-	// 	return
-	// }
+	newFlightRequest.ImgURL, err = h.minio.SaveImage(c.Request.Context(), file, header)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "ошибка при сохранении изображения"})
+		return
+	}
 
 	err = h.repo.CreateNewRequestForFlight(newFlightRequest)
 
@@ -162,6 +165,10 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 }
 
 func (h *Handler) ChangeRequestForFlight(c *gin.Context) {
+	file, header, err := c.Request.FormFile("image")
+	if err != nil {
+		h.logger.Errorf("Handler/flight_request/ChangeRequestForFlight/Error read file: %s", err)
+	}
 	var changedFlightRequest models.FlightRequest
 
 	strCardId := c.Param("id")
@@ -176,11 +183,17 @@ func (h *Handler) ChangeRequestForFlight(c *gin.Context) {
 
 	// log.Println("title", newFlightRequest.Title)
 
-	_, header, _ := c.Request.FormFile("image")
 	if header != nil && header.Size != 0 {
-		// delete old image
-		// add new image
-		changedFlightRequest.ImgURL = "https://finobzor.ru/uploads/posts/2016-09/org_vrke626.jpg"
+		changedFlightRequest.ImgURL, err = h.minio.SaveImage(c.Request.Context(), file, header)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err})
+			return
+		}
+
+		url := h.repo.GetFlightRequestImageUrl(changedFlightRequest.RequestId)
+
+		// delete image from minio
+		h.minio.DeleteImage(c.Request.Context(), utils.ExtractObjectNameFromUrl(url))
 	}
 
 	// log.Println("image", newFlightRequest.ImgURL)

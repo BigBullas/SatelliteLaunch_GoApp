@@ -1,24 +1,27 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 
 	"RIP_lab1/internal/api"
+	"RIP_lab1/internal/pkg/minio"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type Handler struct {
-	repo api.Repo
+	repo   api.Repo
+	minio  minio.Client
+	logger *logrus.Entry
 }
 
-func NewHandler(repo api.Repo) *Handler {
-	return &Handler{repo: repo}
+func NewHandler(repo api.Repo, minio minio.Client, logger *logrus.Logger) *Handler {
+	return &Handler{repo: repo, minio: minio, logger: logger.WithField("component", "handler")}
 }
 
 func (h *Handler) StartServer() {
-	log.Println("Server start up")
+	h.logger.Println("Server start up")
 
 	r := gin.Default()
 	r.GET("/ping", h.Ping)
@@ -54,7 +57,7 @@ func (h *Handler) StartServer() {
 
 	err := r.Run(":8080")
 	if err != nil {
-		log.Fatalln(err)
+		h.logger.Fatalln(err)
 	}
 }
 

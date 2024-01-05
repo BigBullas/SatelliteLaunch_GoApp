@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"strconv"
 	"time"
 
 	"RIP_lab1/internal/models"
@@ -159,4 +160,11 @@ func (r *Repository) ChangeCountFlightsFlightRequest(userId int, requestId int, 
 	}
 
 	return nil
+}
+
+func (r *Repository) GetFlightRequestImageUrl(requestId int) string {
+	flightRequest := models.FlightRequest{}
+
+	r.db.First(&flightRequest, "request_id = ?", strconv.Itoa(requestId))
+	return flightRequest.ImgURL
 }

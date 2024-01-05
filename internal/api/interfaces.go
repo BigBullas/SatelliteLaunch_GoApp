@@ -6,11 +6,12 @@ import (
 )
 
 type Repo interface {
-	GetRequestForFlightList(substring string) ([]models.FlightRequest, error)
-	GetCardRequestForFlightById(cardId int) (models.FlightRequest, error)
+	GetRequestForFlightList(string) ([]models.FlightRequest, error)
+	GetCardRequestForFlightById(int) (models.FlightRequest, error)
 	CreateNewRequestForFlight(models.FlightRequest) error
 	ChangeRequestForFlight(models.FlightRequest) error
-	DeleteRequestForFlightById(cardId int) error
+	DeleteRequestForFlightById(int) error
+	GetFlightRequestImageUrl(int) string
 
 	AddFlightRequestToFlight(models.RocketFlightShort) error
 	DeleteRequestFromFlight(int, int) error

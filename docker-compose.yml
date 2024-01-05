@@ -63,7 +63,7 @@ services:
       - minio3
       - minio4
 
-  postgres:
+  db:
     image: postgres:14
     env_file:
       - .env

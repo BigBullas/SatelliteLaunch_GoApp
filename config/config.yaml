@@ -1,2 +1,9 @@
 db:
   connection_string: "host=localhost port=5433 user=admin dbname=rip_lab options='-c search_path=public' password=qwerty321 sslmode=disable"
+
+minio:
+  host: "localhost:9000"
+  location: "us-east-1"
+  accessKeyId: "minio"
+  secretAccessKey: "minio124"
+  bucketName: "requests"
