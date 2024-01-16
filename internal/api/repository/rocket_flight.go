@@ -9,56 +9,153 @@ import (
 	"gorm.io/gorm"
 )
 
+func (r *Repository) GetUserByUserId(user_id int) (models.User, error) {
+	user := models.User{}
+	result := r.db.Table("users").Select("login").Where("user_id = ?", user_id).First(&user)
+	return user, result.Error
+}
+
+func (r *Repository) GetLoginsForFlights(rocketFlights []models.RocketFlight) ([]models.RocketFlight, error) {
+	var creator models.User
+	var moderator models.User
+	var err error
+
+	for i := range rocketFlights {
+		creator, err = r.GetUserByUserId(rocketFlights[i].CreatorId)
+		moderator, err = r.GetUserByUserId(rocketFlights[i].ModeratorId)
+		if err != nil {
+			return rocketFlights, err
+		}
+		rocketFlights[i].CreatorLogin = creator.Login
+		rocketFlights[i].ModeratorLogin = moderator.Login
+	}
+
+	return rocketFlights, nil
+}
+
 func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd time.Time, status string) ([]models.RocketFlight, error) {
 	var rocketFlights []models.RocketFlight
+	var err error
 
 	if status != "" {
 		if formDateStart.IsZero() {
 			if formDateEnd.IsZero() {
 				// фильтрация только по статусу
 				res := r.db.Where("status = ?", status).Find(&rocketFlights)
-				return rocketFlights, res.Error
+				if res.Error != nil {
+					return rocketFlights, res.Error
+				}
+
+				rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
+				if err != nil {
+					return rocketFlights, err
+				}
+
+				return rocketFlights, nil
 			}
 
 			// фильтрация по статусу и formDateEnd
 			res := r.db.Where("status = ?", status).Where("formed_at < ?", formDateEnd).Find(&rocketFlights)
-			return rocketFlights, res.Error
+			if res.Error != nil {
+				return rocketFlights, res.Error
+			}
+
+			rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
+			if err != nil {
+				return rocketFlights, err
+			}
+
+			return rocketFlights, nil
 		}
 
 		// фильтрация по статусу и formDateStart
 		if formDateEnd.IsZero() {
 			res := r.db.Where("status = ?", status).Where("formed_at > ?", formDateStart).
 				Find(&rocketFlights)
-			return rocketFlights, res.Error
+			if res.Error != nil {
+				return rocketFlights, res.Error
+			}
+
+			rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
+			if err != nil {
+				return rocketFlights, err
+			}
+
+			return rocketFlights, nil
 		}
 
 		// фильтрация по статусу, formDateStart и formDateEnd
 		res := r.db.Where("status = ?", status).Where("formed_at BETWEEN ? AND ?", formDateStart, formDateEnd).Find(&rocketFlights)
-		return rocketFlights, res.Error
+		if res.Error != nil {
+			return rocketFlights, res.Error
+		}
+
+		rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
+		if err != nil {
+			return rocketFlights, err
+		}
+
+		return rocketFlights, nil
 	}
 
 	if formDateStart.IsZero() {
 		if formDateEnd.IsZero() {
 			// без фильтрации
 			res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Find(&rocketFlights)
-			return rocketFlights, res.Error
+			if res.Error != nil {
+				return rocketFlights, res.Error
+			}
+
+			rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
+			if err != nil {
+				return rocketFlights, err
+			}
+
+			return rocketFlights, nil
 		}
 
 		// фильтрация по formDateEnd
 		res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Where("formed_at < ?", formDateEnd).Find(&rocketFlights)
-		return rocketFlights, res.Error
+		if res.Error != nil {
+			return rocketFlights, res.Error
+		}
+
+		rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
+		if err != nil {
+			return rocketFlights, err
+		}
+
+		return rocketFlights, nil
 	}
 
 	if formDateEnd.IsZero() {
 		// фильтрация по formDateStart
 		res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Where("formed_at > ?", formDateStart).Find(&rocketFlights)
-		return rocketFlights, res.Error
+		if res.Error != nil {
+			return rocketFlights, res.Error
+		}
+
+		rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
+		if err != nil {
+			return rocketFlights, err
+		}
+
+		return rocketFlights, nil
 	}
 
 	//фильтрация по formDateStart и formDateEnd
 	res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).
 		Where("formed_at BETWEEN ? AND ?", formDateStart, formDateEnd).Find(&rocketFlights)
-	return rocketFlights, res.Error
+	if res.Error != nil {
+		return rocketFlights, res.Error
+	}
+
+	rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
+	if err != nil {
+		return rocketFlights, err
+	}
+
+	return rocketFlights, nil
 }
 
 func (r *Repository) GetRocketFlightDraft(userId int) (int, error) {
@@ -71,46 +168,25 @@ func (r *Repository) GetRocketFlightDraft(userId int) (int, error) {
 	return rocketFlight.FlightId, nil
 }
 
-func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlightDetailed, []models.FlightRequest, error) {
+func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlight, []models.Payload, error) {
 	var rocketFlight models.RocketFlight
 	// var rocketFlightDetailed models.RocketFlightDetailed
-	var flightRequests []models.FlightRequest
+	var flightRequests []models.Payload
+	var err error
 
 	//информация по данному полёту
 	result := r.db.First(&rocketFlight, "flight_id =?", flightId)
 	if result.Error != nil {
 		// log.Println("Ошибка при получении данного полёта")
-		return models.RocketFlightDetailed{}, []models.FlightRequest{}, result.Error
+		return models.RocketFlight{}, []models.Payload{}, result.Error
 	}
 
-	var creator models.UserShort
-	result = r.db.Table("users").Select("login").Where("user_id = ?", 1).First(&creator)
-	if result.Error != nil {
-		// log.Println("Ошибка при получении данного полёта")
-		return models.RocketFlightDetailed{}, []models.FlightRequest{}, result.Error
+	rocketFlights := []models.RocketFlight{rocketFlight}
+	rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
+	if err != nil {
+		return models.RocketFlight{}, []models.Payload{}, err
 	}
-
-	var moderator models.UserShort
-	result = r.db.Table("users").Select("login").Where("user_id = ?", 2).First(&moderator)
-	if result.Error != nil {
-		// log.Println("Ошибка при получении данного полёта")
-		return models.RocketFlightDetailed{}, []models.FlightRequest{}, result.Error
-	}
-
-	rocketFlightDetailed := models.RocketFlightDetailed{
-		FlightId:       rocketFlight.FlightId,
-		CreatorLogin:   creator.Login,
-		ModeratorLogin: moderator.Login,
-		Status:         rocketFlight.Status,
-		CreatedAt:      rocketFlight.CreatedAt,
-		FormedAt:       rocketFlight.FormedAt,
-		ConfirmedAt:    rocketFlight.ConfirmedAt,
-		FlightDate:     rocketFlight.FlightDate,
-		Payload:        rocketFlight.Payload,
-		Price:          rocketFlight.Price,
-		Title:          rocketFlight.Title,
-		PlaceNumber:    rocketFlight.PlaceNumber,
-	}
+	rocketFlight = rocketFlights[0]
 
 	//заявки на полёт КА, принятые на данный полёт
 	result = r.db.Table("flights_flight_requests").Select("flight_requests.*").
@@ -118,13 +194,13 @@ func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlightDetai
 		Where("flights_flight_requests.flight_id = ?", flightId).Find(&flightRequests)
 	if result.Error != nil {
 		// log.Println("Ошибка при получении заявок на полёт КА по данному полёту")
-		return models.RocketFlightDetailed{}, []models.FlightRequest{}, result.Error
+		return models.RocketFlight{}, []models.Payload{}, result.Error
 	}
 
-	return rocketFlightDetailed, flightRequests, nil
+	return rocketFlight, flightRequests, nil
 }
 
-func (r *Repository) ChangeRocketFlight(changedRocketFlight models.RocketFlightChangeable) error {
+func (r *Repository) ChangeRocketFlight(changedRocketFlight models.RocketFlight) error {
 	var oldRocketFlight models.RocketFlight
 	result := r.db.Table("rocket_flights").Where("creator_id = ? AND status = ?", changedRocketFlight.CreatorId, "draft").Find(&oldRocketFlight)
 	if result.Error != nil {
@@ -135,8 +211,8 @@ func (r *Repository) ChangeRocketFlight(changedRocketFlight models.RocketFlightC
 		oldRocketFlight.FlightDate = changedRocketFlight.FlightDate
 	}
 
-	if changedRocketFlight.Payload != 0 {
-		oldRocketFlight.Payload = changedRocketFlight.Payload
+	if changedRocketFlight.LoadCapacity != 0 {
+		oldRocketFlight.LoadCapacity = changedRocketFlight.LoadCapacity
 	}
 
 	if changedRocketFlight.Price != 0.0 {

@@ -27,25 +27,26 @@ func (h *Handler) GetRequestForFlightList(c *gin.Context) {
 		return
 	}
 
+	// if flightId == 0 {
+	// 	c.HTML(http.StatusOK, "index.gohtml", gin.H{
+	// 		"cards":           data,
+	// 		"space_satellite": strSearch,
+	// 	})
+	// 	return
+	// }
+
+	// c.HTML(http.StatusOK, "index.gohtml", gin.H{
+	// 	"cards":               data,
+	// 	"space_satellite":     strSearch,
+	// 	"draftRocketFlightId": flightId,
+	// })
+
 	if flightId == 0 {
-		c.HTML(http.StatusOK, "index.gohtml", gin.H{
-			"cards":           data,
-			"space_satellite": strSearch,
-		})
+		c.JSON(http.StatusOK, gin.H{"flight_requests": data, "draftRocketFlightId": nil})
 		return
 	}
 
-	c.HTML(http.StatusOK, "index.gohtml", gin.H{
-		"cards":               data,
-		"space_satellite":     strSearch,
-		"draftRocketFlightId": flightId,
-	})
-
-// 	if flightId == 0 {
-// 		c.JSON(http.StatusOK, gin.H{"flight_requests": data})
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, gin.H{"flight_requests": data, "draftRocketFlightId": flightId})
+	c.JSON(http.StatusOK, gin.H{"flight_requests": data, "draftRocketFlightId": flightId})
 }
 
 func (h *Handler) GetCardRequestForFlightById(c *gin.Context) {
@@ -67,7 +68,7 @@ func (h *Handler) GetCardRequestForFlightById(c *gin.Context) {
 }
 
 func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
-	var newFlightRequest models.FlightRequest
+	var newFlightRequest models.Payload
 
 	newFlightRequest.Title = c.Request.FormValue("title")
 	if newFlightRequest.Title == "" {
@@ -169,7 +170,7 @@ func (h *Handler) ChangeRequestForFlight(c *gin.Context) {
 	if err != nil {
 		h.logger.Errorf("Handler/flight_request/ChangeRequestForFlight/Error read file: %s", err)
 	}
-	var changedFlightRequest models.FlightRequest
+	var changedFlightRequest models.Payload
 
 	strCardId := c.Param("id")
 	cardId, err := strconv.Atoi(strCardId)
@@ -177,7 +178,7 @@ func (h *Handler) ChangeRequestForFlight(c *gin.Context) {
 		log.Println("Ошибка при преобразовании строки в число:", err)
 		return
 	}
-	changedFlightRequest.RequestId = cardId
+	changedFlightRequest.PayloadId = cardId
 
 	changedFlightRequest.Title = c.Request.FormValue("title")
 
@@ -190,7 +191,7 @@ func (h *Handler) ChangeRequestForFlight(c *gin.Context) {
 			return
 		}
 
-		url := h.repo.GetFlightRequestImageUrl(changedFlightRequest.RequestId)
+		url := h.repo.GetFlightRequestImageUrl(changedFlightRequest.PayloadId)
 
 		// delete image from minio
 		h.minio.DeleteImage(c.Request.Context(), utils.ExtractObjectNameFromUrl(url))
@@ -274,21 +275,31 @@ func (h *Handler) DeleteRequestForFlightById(c *gin.Context) {
 }
 
 func (h *Handler) AddFlightRequestToFlight(c *gin.Context) {
-	var shortFlight models.RocketFlightShort
+	var creatorId int
+	var requestId int
 
-	err := c.BindJSON(&shortFlight)
+	type RocketFlightShort struct {
+		CreatorId int
+		RequestId int
+	}
+
+	jsonStr := RocketFlightShort{}
+
+	err := c.ShouldBindJSON(&jsonStr)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	shortFlight.CreatorId = 1
 
-	if shortFlight.RequestId == 0 {
+	creatorId = 1
+	requestId = jsonStr.RequestId
+
+	if requestId == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Требуется хотя бы одна заявка на полёт КА"})
 		return
 	}
 
-	err = h.repo.AddFlightRequestToFlight(shortFlight)
+	err = h.repo.AddFlightRequestToFlight(creatorId, requestId)
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})

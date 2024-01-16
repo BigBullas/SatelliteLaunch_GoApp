@@ -18,7 +18,7 @@ func NewRepo(dsn string) (*Repository, error) {
 	}
 
 	// Migrate the schema
-	err = db.AutoMigrate(&models.FlightRequest{})
+	err = db.AutoMigrate(&models.Payload{})
 	if err != nil {
 		panic("Миграция БД не удалась")
 	}

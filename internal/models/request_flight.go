@@ -1,7 +1,7 @@
 package models
 
-type FlightsFlightRequest struct {
+type FlightsPayload struct {
 	FlightId        int
-	RequestId       int
+	PayloadId       int
 	CountSatellites int
 }

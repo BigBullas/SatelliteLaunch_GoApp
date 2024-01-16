@@ -8,28 +8,28 @@ import (
 	"RIP_lab1/internal/models"
 )
 
-func (r *Repository) GetRequestForFlightList(substring string) ([]models.FlightRequest, error) {
-	var request_for_delivery []models.FlightRequest
+func (r *Repository) GetRequestForFlightList(substring string) ([]models.Payload, error) {
+	var request_for_delivery []models.Payload
 
 	r.db.Where("title ILIKE ?", "%"+substring+"%").Find(&request_for_delivery, "is_available = ?", true)
 	return request_for_delivery, nil
 }
 
-func (r *Repository) GetCardRequestForFlightById(cardId int) (models.FlightRequest, error) {
-	var card models.FlightRequest
+func (r *Repository) GetCardRequestForFlightById(cardId int) (models.Payload, error) {
+	var card models.Payload
 
 	r.db.Where("request_id = ?", cardId).Find(&card, "is_available = ?", true)
 	return card, nil
 }
 
-func (r *Repository) CreateNewRequestForFlight(newFlightRequest models.FlightRequest) error {
+func (r *Repository) CreateNewRequestForFlight(newFlightRequest models.Payload) error {
 	result := r.db.Create(&newFlightRequest)
 	return result.Error
 }
 
-func (r *Repository) ChangeRequestForFlight(changedFlightRequest models.FlightRequest) error {
-	var oldFlightRequest models.FlightRequest
-	result := r.db.First(&oldFlightRequest, "request_id =?", changedFlightRequest.RequestId)
+func (r *Repository) ChangeRequestForFlight(changedFlightRequest models.Payload) error {
+	var oldFlightRequest models.Payload
+	result := r.db.First(&oldFlightRequest, "request_id =?", changedFlightRequest.PayloadId)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -78,16 +78,16 @@ func (r *Repository) DeleteRequestForFlightById(cardId int) error {
 	return nil
 }
 
-func (r *Repository) AddFlightRequestToFlight(shortFlight models.RocketFlightShort) error {
+func (r *Repository) AddFlightRequestToFlight(creatorId int, requestId int) error {
 	var rocketFlight models.RocketFlight
 
-	r.db.Where("creator_id = ?", shortFlight.CreatorId).Where("status = ?", "draft").First(&rocketFlight)
+	r.db.Where("creator_id = ?", creatorId).Where("status = ?", "draft").First(&rocketFlight)
 
 	// log.Println(rocketFlight)
 
 	if rocketFlight.FlightId == 0 {
 		newRocketFlights := models.RocketFlight{
-			CreatorId:   shortFlight.CreatorId,
+			CreatorId:   creatorId,
 			ModeratorId: 2,
 			Status:      "draft",
 			CreatedAt:   time.Now(),
@@ -99,9 +99,10 @@ func (r *Repository) AddFlightRequestToFlight(shortFlight models.RocketFlightSho
 		rocketFlight = newRocketFlights
 	}
 
-	flightRequestFlight := models.FlightsFlightRequest{
-		FlightId:  rocketFlight.FlightId,
-		RequestId: shortFlight.RequestId,
+	flightRequestFlight := models.FlightsPayload{
+		FlightId:        rocketFlight.FlightId,
+		PayloadId:       requestId,
+		CountSatellites: 1,
 	}
 
 	res := r.db.Create(&flightRequestFlight)
@@ -120,13 +121,13 @@ func (r *Repository) DeleteRequestFromFlight(userId int, requestId int) error {
 		return errors.New("Нет заявки-черновика на полёт ракеты-носителя")
 	}
 
-	var flightsFlightRequest models.FlightsFlightRequest
+	var flightsFlightRequest models.FlightsPayload
 	err := r.db.Where("flight_id = ? AND request_id = ?", rocketFlight.FlightId, requestId).First(&flightsFlightRequest).Error
 	if err != nil {
 		return errors.New("Такой заявки нет в данном планируемом полёте")
 	}
 
-	err = r.db.Where("flight_id = ? AND request_id = ?", rocketFlight.FlightId, requestId).Delete(models.FlightsFlightRequest{}).Error
+	err = r.db.Where("flight_id = ? AND request_id = ?", rocketFlight.FlightId, requestId).Delete(models.FlightsPayload{}).Error
 
 	if err != nil {
 		return err
@@ -143,7 +144,7 @@ func (r *Repository) ChangeCountFlightsFlightRequest(userId int, requestId int, 
 		return errors.New("Нет заявки-черновика на полёт ракеты-носителя")
 	}
 
-	var flightsFlightRequest models.FlightsFlightRequest
+	var flightsFlightRequest models.FlightsPayload
 	err := r.db.Where("flight_id = ? AND request_id = ?", rocketFlight.FlightId, requestId).First(&flightsFlightRequest).Error
 	if err != nil {
 		return errors.New("Такой заявки нет в данном планируемом полёте")
@@ -163,7 +164,7 @@ func (r *Repository) ChangeCountFlightsFlightRequest(userId int, requestId int, 
 }
 
 func (r *Repository) GetFlightRequestImageUrl(requestId int) string {
-	flightRequest := models.FlightRequest{}
+	flightRequest := models.Payload{}
 
 	r.db.First(&flightRequest, "request_id = ?", strconv.Itoa(requestId))
 	return flightRequest.ImgURL

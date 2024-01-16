@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-type FlightRequest struct {
-	RequestId       int `gorm:"primarykey"`
+type Payload struct {
+	PayloadId       int `gorm:"primarykey"`
 	IsAvailable     bool
 	ImgURL          string
 	Title           string

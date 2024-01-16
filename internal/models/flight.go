@@ -3,45 +3,18 @@ package models
 import "time"
 
 type RocketFlight struct {
-	FlightId    int `gorm:"primarykey"`
-	CreatorId   int
-	ModeratorId int
-	Status      string
-	CreatedAt   time.Time
-	FormedAt    time.Time
-	ConfirmedAt time.Time
-	FlightDate  time.Time
-	Payload     int
-	Price       float64
-	Title       string
-	PlaceNumber int
-}
-
-type RocketFlightDetailed struct {
-	FlightId       int `gorm:"primarykey"`
-	CreatorLogin   string
-	ModeratorLogin string
-	Status         string
-	CreatedAt      time.Time
-	FormedAt       time.Time
-	ConfirmedAt    time.Time
-	FlightDate     time.Time
-	Payload        int
-	Price          float64
-	Title          string
-	PlaceNumber    int
-}
-
-type RocketFlightShort struct {
-	CreatorId int
-	RequestId int
-}
-
-type RocketFlightChangeable struct {
-	CreatorId   int
-	FlightDate  time.Time
-	Payload     int
-	Price       float64
-	Title       string
-	PlaceNumber int
+	FlightId       int       `gorm:"primarykey" json:"flightId,omitempty"`
+	CreatorId      int       `json:"creatorId,omitempty"`
+	CreatorLogin   string    `json:"creatorLogin,omitempty" gorm:"-"`
+	ModeratorId    int       `json:"moderatorId,omitempty"`
+	ModeratorLogin string    `json:"moderatorLogin,omitempty" gorm:"-"`
+	Status         string    `json:"status,omitempty"`
+	CreatedAt      time.Time `json:"createdAt,omitempty"`
+	FormedAt       time.Time `json:"formedAtomitempty"`
+	ConfirmedAt    time.Time `json:"confirmedAt,omitempty"`
+	FlightDate     time.Time `json:"flightDate,omitempty"`
+	LoadCapacity   int       `json:"loadCapacity,omitempty"`
+	Price          float64   `json:"price,omitempty"`
+	Title          string    `json:"title,omitempty"`
+	PlaceNumber    int       `json:"placeNumber,omitempty"`
 }

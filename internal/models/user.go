@@ -7,8 +7,3 @@ type User struct {
 	Password string
 	IsAdmin  bool
 }
-
-type UserShort struct {
-	UserId int `gorm:"primarykey"`
-	Login  string
-}

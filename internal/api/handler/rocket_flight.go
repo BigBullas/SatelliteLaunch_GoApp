@@ -46,6 +46,16 @@ func (h *Handler) GetRocketFlightList(c *gin.Context) {
 		return
 	}
 
+	for i := range rocketFlights {
+
+		h.logger.Println("in for: ", i)
+
+		rocketFlights[i].ModeratorId = 0
+		rocketFlights[i].CreatorId = 0
+	}
+
+	h.logger.Println("after for: ")
+
 	c.JSON(http.StatusOK, rocketFlights)
 }
 
@@ -63,11 +73,15 @@ func (h *Handler) GetRocketFlightById(c *gin.Context) {
 		return
 	}
 
+	rocket_flight.CreatorId = 0
+	rocket_flight.ModeratorId = 0
+
 	c.JSON(http.StatusOK, gin.H{"rocket_flight": rocket_flight, "flight_requests": flight_requests})
 }
 
 func (h *Handler) ChangeRocketFlight(c *gin.Context) {
-	var newRocketFlight models.RocketFlightChangeable
+	newRocketFlight := models.RocketFlight{}
+
 	err := c.BindJSON(&newRocketFlight)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
