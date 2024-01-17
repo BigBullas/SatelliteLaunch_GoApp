@@ -30,15 +30,15 @@ func (h *Handler) StartServer() {
 
 	r.Static("/image", "./resources")
 	r.Static("/style", "./style")
-	// заявки на полёт
-	r.GET("/flight_requests", h.GetRequestForFlightList)
-	r.GET("/flight_requests/:id", h.GetCardRequestForFlightById)
-	r.POST("/flight_requests", h.CreateNewRequestForFlight)
-	r.PUT("/flight_requests/:id", h.ChangeRequestForFlight)
-	r.DELETE("/flight_requests/:id", h.DeleteRequestForFlightById)
+	// полезные нагрузки
+	r.GET("/payloads", h.GetPayloadList)
+	r.GET("/payloads/:id", h.GetCardPayloadById)
+	r.POST("/payloads", h.CreateNewPayload)
+	r.PUT("/payloads/:id", h.ChangePayload)
+	r.DELETE("/payloads/:id", h.DeletePayloadById)
 
 	// удалить после перехода на фронт
-	r.POST("/flight_request/:id", h.DeleteRequestForFlightById)
+	r.POST("/payload/:id", h.DeletePayloadById)
 
 	// полёты ракет-носителей
 	r.GET("/rocket_flights", h.GetRocketFlightList)
@@ -48,12 +48,12 @@ func (h *Handler) StartServer() {
 	r.PUT("/rocket_flights/:id/response", h.ResponceRocketFlight)
 	r.DELETE("/rocket_flights", h.DeleteRocketFlight)
 
-	// формирование информации о будущем полёте через заявки на полёт
-	r.POST("/flight_requests/rocket_flight", h.AddFlightRequestToFlight)
+	// формирование информации о будущем полёте через полезные нагрузки
+	r.POST("/payloads/rocket_flight", h.AddPayloadToFlight)
 
 	// m-m
-	r.DELETE("/flights_flight_requests/flight_request/:id", h.DeleteRequestFromFlight)
-	r.PUT("/flights_flight_requests/flight_request/:id/count/:count", h.ChangeCountFlightsFlightRequest)
+	r.DELETE("/flights_payloads/payload/:id", h.DeletePayloadFromFlight)
+	r.PUT("/flights_payloads/payload/:id/count/:count", h.ChangeCountFlightsPayload)
 
 	err := r.Run(":8080")
 	if err != nil {

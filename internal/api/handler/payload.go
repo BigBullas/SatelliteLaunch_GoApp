@@ -12,11 +12,11 @@ import (
 	"RIP_lab1/internal/utils"
 )
 
-func (h *Handler) GetRequestForFlightList(c *gin.Context) {
+func (h *Handler) GetPayloadList(c *gin.Context) {
 	queryString := c.Request.URL.Query()            // queryString - это тип url.Values, который содержит все query параметры
 	strSearch := queryString.Get("space_satellite") // Получение значения конкретного параметра по его имени
 
-	data, err := h.repo.GetRequestForFlightList(strSearch)
+	data, err := h.repo.GetPayloadList(strSearch)
 	if err != nil {
 		log.Println(err)
 	}
@@ -42,14 +42,14 @@ func (h *Handler) GetRequestForFlightList(c *gin.Context) {
 	// })
 
 	if flightId == 0 {
-		c.JSON(http.StatusOK, gin.H{"flight_requests": data, "draftRocketFlightId": nil})
+		c.JSON(http.StatusOK, gin.H{"payloads": data, "draftRocketFlightId": nil})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"flight_requests": data, "draftRocketFlightId": flightId})
+	c.JSON(http.StatusOK, gin.H{"payloads": data, "draftRocketFlightId": flightId})
 }
 
-func (h *Handler) GetCardRequestForFlightById(c *gin.Context) {
+func (h *Handler) GetCardPayloadById(c *gin.Context) {
 	strCardId := c.Param("id")
 	cardId, err := strconv.Atoi(strCardId)
 	if err != nil {
@@ -57,7 +57,7 @@ func (h *Handler) GetCardRequestForFlightById(c *gin.Context) {
 		return
 	}
 
-	card, err := h.repo.GetCardRequestForFlightById(cardId)
+	card, err := h.repo.GetCardPayloadById(cardId)
 	if err != nil {
 		log.Println(err)
 	}
@@ -67,16 +67,16 @@ func (h *Handler) GetCardRequestForFlightById(c *gin.Context) {
 	})
 }
 
-func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
-	var newFlightRequest models.Payload
+func (h *Handler) CreateNewPayload(c *gin.Context) {
+	var newPayload models.Payload
 
-	newFlightRequest.Title = c.Request.FormValue("title")
-	if newFlightRequest.Title == "" {
+	newPayload.Title = c.Request.FormValue("title")
+	if newPayload.Title == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Название КА не может быть пустым"})
 		return
 	}
 
-	// log.Println("title", newFlightRequest.Title)
+	// log.Println("title", newPayload.Title)
 
 	file, header, err := c.Request.FormFile("image")
 	if err != nil {
@@ -88,13 +88,13 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 	// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Не было выслано изображение"})
 	// 	return
 	// }
-	// newFlightRequest.ImgURL = "https://ntv-static.cdnvideo.ru/home/news/2023/20230205/sputn_io.jpg"
+	// newPayload.ImgURL = "https://ntv-static.cdnvideo.ru/home/news/2023/20230205/sputn_io.jpg"
 
-	// log.Println("image", newFlightRequest.ImgURL)
+	// log.Println("image", newPayload.ImgURL)
 
 	loadCapacity := c.Request.FormValue("load_capacity")
 	if loadCapacity != "" {
-		newFlightRequest.LoadCapacity, err = strconv.ParseFloat(loadCapacity, 64)
+		newPayload.LoadCapacity, err = strconv.ParseFloat(loadCapacity, 64)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указан полезный вес КА"})
 			return
@@ -104,23 +104,23 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 		return
 	}
 
-	// log.Println("load_capacity", newFlightRequest.LoadCapacity)
+	// log.Println("load_capacity", newPayload.LoadCapacity)
 
-	newFlightRequest.Description = c.Request.FormValue("description")
-	newFlightRequest.DetailedDesc = c.Request.FormValue("detailed_description")
+	newPayload.Description = c.Request.FormValue("description")
+	newPayload.DetailedDesc = c.Request.FormValue("detailed_description")
 
-	// log.Println("descriptions: ", newFlightRequest.Description, newFlightRequest.DetailedDesc)
+	// log.Println("descriptions: ", newPayload.Description, newPayload.DetailedDesc)
 
 	desiredPrice := c.Request.FormValue("desired_price")
 	if desiredPrice != "" {
-		newFlightRequest.DesiredPrice, err = strconv.ParseFloat(desiredPrice, 64)
+		newPayload.DesiredPrice, err = strconv.ParseFloat(desiredPrice, 64)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана желаемая цена услуги"})
 			return
 		}
 	}
 
-	// log.Println("desired price: ", newFlightRequest.DesiredPrice)
+	// log.Println("desired price: ", newPayload.DesiredPrice)
 
 	startDate := c.Request.FormValue("flight_date_start")
 	if startDate == "" {
@@ -130,7 +130,7 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 
 	// log.Println("start date: ", startDate)
 
-	newFlightRequest.FlightDateStart, err = time.Parse("2006-01-02 15:04:05", startDate)
+	newPayload.FlightDateStart, err = time.Parse("2006-01-02 15:04:05", startDate)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата начала желаемого периода полёта"})
 		return
@@ -141,36 +141,36 @@ func (h *Handler) CreateNewRequestForFlight(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Дата конца желаемого периода полёта не может быть пустой"})
 		return
 	}
-	newFlightRequest.FlightDateEnd, err = time.Parse("2006-01-02 15:04:05", endDate)
+	newPayload.FlightDateEnd, err = time.Parse("2006-01-02 15:04:05", endDate)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата конца желаемого периода полёта"})
 		return
 	}
 
-	newFlightRequest.IsAvailable = true
+	newPayload.IsAvailable = true
 
-	newFlightRequest.ImgURL, err = h.minio.SaveImage(c.Request.Context(), file, header)
+	newPayload.ImgURL, err = h.minio.SaveImage(c.Request.Context(), file, header)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "ошибка при сохранении изображения"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Ошибка при сохранении изображения"})
 		return
 	}
 
-	err = h.repo.CreateNewRequestForFlight(newFlightRequest)
+	err = h.repo.CreateNewPayload(newPayload)
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err})
 		return
 	}
 
-	c.JSON(http.StatusCreated, "Новая заявка на полёт успешно создана")
+	c.JSON(http.StatusCreated, "Новая полезная нагрузка успешно создана")
 }
 
-func (h *Handler) ChangeRequestForFlight(c *gin.Context) {
+func (h *Handler) ChangePayload(c *gin.Context) {
 	file, header, err := c.Request.FormFile("image")
 	if err != nil {
-		h.logger.Errorf("Handler/flight_request/ChangeRequestForFlight/Error read file: %s", err)
+		h.logger.Errorf("Handler/payload/ChangePayload/Ошибка при чтении файла: %s", err)
 	}
-	var changedFlightRequest models.Payload
+	var changedPayload models.Payload
 
 	strCardId := c.Param("id")
 	cardId, err := strconv.Atoi(strCardId)
@@ -178,57 +178,57 @@ func (h *Handler) ChangeRequestForFlight(c *gin.Context) {
 		log.Println("Ошибка при преобразовании строки в число:", err)
 		return
 	}
-	changedFlightRequest.PayloadId = cardId
+	changedPayload.PayloadId = cardId
 
-	changedFlightRequest.Title = c.Request.FormValue("title")
+	changedPayload.Title = c.Request.FormValue("title")
 
-	// log.Println("title", newFlightRequest.Title)
+	// log.Println("title", newPayload.Title)
 
 	if header != nil && header.Size != 0 {
-		changedFlightRequest.ImgURL, err = h.minio.SaveImage(c.Request.Context(), file, header)
+		changedPayload.ImgURL, err = h.minio.SaveImage(c.Request.Context(), file, header)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err})
 			return
 		}
 
-		url := h.repo.GetFlightRequestImageUrl(changedFlightRequest.PayloadId)
+		url := h.repo.GetPayloadImageUrl(changedPayload.PayloadId)
 
 		// delete image from minio
 		h.minio.DeleteImage(c.Request.Context(), utils.ExtractObjectNameFromUrl(url))
 	}
 
-	// log.Println("image", newFlightRequest.ImgURL)
+	// log.Println("image", newPayload.ImgURL)
 
 	loadCapacity := c.Request.FormValue("load_capacity")
 	if loadCapacity != "" {
-		changedFlightRequest.LoadCapacity, err = strconv.ParseFloat(loadCapacity, 64)
+		changedPayload.LoadCapacity, err = strconv.ParseFloat(loadCapacity, 64)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указан полезный вес КА"})
 			return
 		}
 	}
 
-	// log.Println("load_capacity", newFlightRequest.LoadCapacity)
+	// log.Println("load_capacity", newPayload.LoadCapacity)
 
-	changedFlightRequest.Description = c.Request.FormValue("description")
-	changedFlightRequest.DetailedDesc = c.Request.FormValue("detailed_description")
+	changedPayload.Description = c.Request.FormValue("description")
+	changedPayload.DetailedDesc = c.Request.FormValue("detailed_description")
 
-	// log.Println("descriptions: ", newFlightRequest.Description, newFlightRequest.DetailedDesc)
+	// log.Println("descriptions: ", newPayload.Description, newPayload.DetailedDesc)
 
 	desiredPrice := c.Request.FormValue("desired_price")
 	if desiredPrice != "" {
-		changedFlightRequest.DesiredPrice, err = strconv.ParseFloat(desiredPrice, 64)
+		changedPayload.DesiredPrice, err = strconv.ParseFloat(desiredPrice, 64)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана желаемая цена услуги"})
 			return
 		}
 	}
 
-	// log.Println("desired price: ", newFlightRequest.DesiredPrice)
+	// log.Println("desired price: ", newPayload.DesiredPrice)
 
 	startDate := c.Request.FormValue("flight_date_start")
 	if startDate != "" {
-		changedFlightRequest.FlightDateStart, err = time.Parse("2006-01-02 15:04:05", startDate)
+		changedPayload.FlightDateStart, err = time.Parse("2006-01-02 15:04:05", startDate)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата начала желаемого периода полёта"})
 			return
@@ -239,48 +239,51 @@ func (h *Handler) ChangeRequestForFlight(c *gin.Context) {
 
 	endDate := c.Request.FormValue("flight_date_end")
 	if endDate != "" {
-		changedFlightRequest.FlightDateEnd, err = time.Parse("2006-01-02 15:04:05", endDate)
+		changedPayload.FlightDateEnd, err = time.Parse("2006-01-02 15:04:05", endDate)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата конца желаемого периода полёта"})
 			return
 		}
 	}
 
-	err = h.repo.ChangeRequestForFlight(changedFlightRequest)
+	err = h.repo.ChangePayload(changedPayload)
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, "Заявка на полёт успешно изменена")
+	c.JSON(http.StatusCreated, "Полезная нагрузка успешно изменена")
 
 }
 
-func (h *Handler) DeleteRequestForFlightById(c *gin.Context) {
+func (h *Handler) DeletePayloadById(c *gin.Context) {
 	strCardId := c.Param("id")
 	cardId, err := strconv.Atoi(strCardId)
+
+	h.logger.Print("strCardI: ", strCardId)
+
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-	err = h.repo.DeleteRequestForFlightById(cardId)
+	err = h.repo.DeletePayloadById(cardId)
 	if err != nil {
 		log.Println("Ошибка при получении заявки на доставку по id: ", cardId, err)
 		c.Error(err)
 		return
 	}
-	c.Redirect(http.StatusFound, "/home")
+	c.Redirect(http.StatusFound, "/payloads")
 }
 
-func (h *Handler) AddFlightRequestToFlight(c *gin.Context) {
+func (h *Handler) AddPayloadToFlight(c *gin.Context) {
 	var creatorId int
-	var requestId int
+	var payloadId int
 
 	type RocketFlightShort struct {
 		CreatorId int
-		RequestId int
+		PayloadId int
 	}
 
 	jsonStr := RocketFlightShort{}
@@ -292,26 +295,26 @@ func (h *Handler) AddFlightRequestToFlight(c *gin.Context) {
 	}
 
 	creatorId = 1
-	requestId = jsonStr.RequestId
+	payloadId = jsonStr.PayloadId
 
-	if requestId == 0 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Требуется хотя бы одна заявка на полёт КА"})
+	if payloadId == 0 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Требуется хотя бы одна полезная нагрузка"})
 		return
 	}
 
-	err = h.repo.AddFlightRequestToFlight(creatorId, requestId)
+	err = h.repo.AddPayloadToFlight(creatorId, payloadId)
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Заявка на полёт КА добавлена в планируемый полёт"})
+	c.JSON(http.StatusOK, gin.H{"message": "Полезная нагрузка добавлена в планируемый полёт"})
 	return
 }
 
-func (h *Handler) DeleteRequestFromFlight(c *gin.Context) {
-	strRequestId := c.Param("id")
-	requestId, err := strconv.Atoi(strRequestId)
+func (h *Handler) DeletePayloadFromFlight(c *gin.Context) {
+	strPayloadId := c.Param("id")
+	payloadId, err := strconv.Atoi(strPayloadId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 		return
@@ -319,17 +322,17 @@ func (h *Handler) DeleteRequestFromFlight(c *gin.Context) {
 
 	userId := 1
 
-	err = h.repo.DeleteRequestFromFlight(userId, requestId)
+	err = h.repo.DeletePayloadFromFlight(userId, payloadId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Заявка на полёт КА успешно удалена из планируемого полёта"})
+	c.JSON(http.StatusOK, gin.H{"message": "Полезная нагрузка КА успешно удалена из планируемого полёта"})
 }
 
-func (h *Handler) ChangeCountFlightsFlightRequest(c *gin.Context) {
-	strRequestId := c.Param("id")
-	requestId, err := strconv.Atoi(strRequestId)
+func (h *Handler) ChangeCountFlightsPayload(c *gin.Context) {
+	strPayloadId := c.Param("id")
+	payloadId, err := strconv.Atoi(strPayloadId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 		return
@@ -344,10 +347,10 @@ func (h *Handler) ChangeCountFlightsFlightRequest(c *gin.Context) {
 
 	userId := 1
 
-	err = h.repo.ChangeCountFlightsFlightRequest(userId, requestId, count)
+	err = h.repo.ChangeCountFlightsPayload(userId, payloadId, count)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Количество заявок на полёт КА успешно изменено"})
+	c.JSON(http.StatusOK, gin.H{"message": "Количество полезных нагрузок успешно изменено"})
 }

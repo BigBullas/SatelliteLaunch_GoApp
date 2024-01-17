@@ -171,7 +171,7 @@ func (r *Repository) GetRocketFlightDraft(userId int) (int, error) {
 func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlight, []models.Payload, error) {
 	var rocketFlight models.RocketFlight
 	// var rocketFlightDetailed models.RocketFlightDetailed
-	var flightRequests []models.Payload
+	var payloads []models.Payload
 	var err error
 
 	//информация по данному полёту
@@ -188,16 +188,16 @@ func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlight, []m
 	}
 	rocketFlight = rocketFlights[0]
 
-	//заявки на полёт КА, принятые на данный полёт
-	result = r.db.Table("flights_flight_requests").Select("flight_requests.*").
-		Joins("JOIN flight_requests ON flights_flight_requests.request_id = flight_requests.request_id").
-		Where("flights_flight_requests.flight_id = ?", flightId).Find(&flightRequests)
+	//полезные нагрузки КА, принятые на данный полёт
+	result = r.db.Table("flights_payloads").Select("payloads.*").
+		Joins("JOIN payloads ON flights_payloads.payload_id = payloads.payload_id").
+		Where("flights_payloads.flight_id = ?", flightId).Find(&payloads)
 	if result.Error != nil {
 		// log.Println("Ошибка при получении заявок на полёт КА по данному полёту")
 		return models.RocketFlight{}, []models.Payload{}, result.Error
 	}
 
-	return rocketFlight, flightRequests, nil
+	return rocketFlight, payloads, nil
 }
 
 func (r *Repository) ChangeRocketFlight(changedRocketFlight models.RocketFlight) error {
@@ -251,7 +251,7 @@ func (r *Repository) ResponceRocketFlight(newFlightStatus models.RocketFlight) e
 
 	err := r.db.First(&rocketFlight, "flight_id = ? and status = 'formed'", newFlightStatus.FlightId)
 	if err.Error != nil && err.Error.Error() == "record not found" {
-		return fmt.Errorf("Такой сформированной заявки на полёт ракеты-носителя нет")
+		return fmt.Errorf("Такой сформированной полезные нагрузки ракеты-носителя нет")
 	}
 	if err.Error != nil {
 		return err.Error

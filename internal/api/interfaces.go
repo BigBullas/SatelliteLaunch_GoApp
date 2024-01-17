@@ -6,20 +6,20 @@ import (
 )
 
 type Repo interface {
-	GetRequestForFlightList(string) ([]models.FlightRequest, error)
-	GetCardRequestForFlightById(int) (models.FlightRequest, error)
-	CreateNewRequestForFlight(models.FlightRequest) error
-	ChangeRequestForFlight(models.FlightRequest) error
-	DeleteRequestForFlightById(int) error
-	GetFlightRequestImageUrl(int) string
+	GetPayloadList(string) ([]models.Payload, error)
+	GetCardPayloadById(int) (models.Payload, error)
+	CreateNewPayload(models.Payload) error
+	ChangePayload(models.Payload) error
+	DeletePayloadById(int) error
+	GetPayloadImageUrl(int) string
 
-	AddFlightRequestToFlight(int, int) error
-	DeleteRequestFromFlight(int, int) error
-	ChangeCountFlightsFlightRequest(int, int, int) error
+	AddPayloadToFlight(int, int) error
+	DeletePayloadFromFlight(int, int) error
+	ChangeCountFlightsPayload(int, int, int) error
 
 	GetRocketFlightList(time.Time, time.Time, string) ([]models.RocketFlight, error)
 	GetRocketFlightDraft(int) (int, error)
-	GetRocketFlightById(int) (models.RocketFlight, []models.FlightRequest, error)
+	GetRocketFlightById(int) (models.RocketFlight, []models.Payload, error)
 	ChangeRocketFlight(models.RocketFlight) error
 	FormRocketFlight(models.RocketFlight) error
 	ResponceRocketFlight(models.RocketFlight) error

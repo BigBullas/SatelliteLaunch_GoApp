@@ -67,7 +67,7 @@ func (h *Handler) GetRocketFlightById(c *gin.Context) {
 		return
 	}
 
-	rocket_flight, flight_requests, err := h.repo.GetRocketFlightById(flightId)
+	rocket_flight, payloads, err := h.repo.GetRocketFlightById(flightId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, err)
 		return
@@ -76,7 +76,7 @@ func (h *Handler) GetRocketFlightById(c *gin.Context) {
 	rocket_flight.CreatorId = 0
 	rocket_flight.ModeratorId = 0
 
-	c.JSON(http.StatusOK, gin.H{"rocket_flight": rocket_flight, "flight_requests": flight_requests})
+	c.JSON(http.StatusOK, gin.H{"rocket_flight": rocket_flight, "payloads": payloads})
 }
 
 func (h *Handler) ChangeRocketFlight(c *gin.Context) {

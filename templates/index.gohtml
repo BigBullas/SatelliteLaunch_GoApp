@@ -68,10 +68,10 @@
               </div>
             </div>
             <div class="card-btn_container">
-              <form action="http://localhost:8080/flight_request/{{ .RequestId }}" method="get">
+              <form action="http://localhost:8080/payload/{{ .RequestId }}" method="get">
                 <input type="submit" value="Подробнее">
               </form>
-              <form action="http://localhost:8080/flight_request/{{ .RequestId }}" method="post">
+              <form action="http://localhost:8080/payload/{{ .RequestId }}" method="post">
                 <button class="card-button">Удалить услугу</button>
               </form>
             </div>
