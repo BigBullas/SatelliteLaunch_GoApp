@@ -10,6 +10,19 @@ import (
 	"RIP_lab1/internal/models"
 )
 
+// GetRocketFlightList godoc
+// @Summary Get rocket flight list
+// @Description Retrieve a list of rocket flights based on the provided query parameters.
+// @Tags RocketFlights
+// @Accept json
+// @Produce json
+// @Param form_date_start query string false "Start date of the formation period"
+// @Param form_date_end query string false "End date of the formation period"
+// @Param status query string false "Status of the flight"
+// @Success 200 {array} []models.RocketFlight
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /rocket_flights [get]
 func (h *Handler) GetRocketFlightList(c *gin.Context) {
 	queryString := c.Request.URL.Query()
 	strFormDateStart := queryString.Get("form_date_start")
@@ -54,11 +67,20 @@ func (h *Handler) GetRocketFlightList(c *gin.Context) {
 		rocketFlights[i].CreatorId = 0
 	}
 
-	h.logger.Println("after for: ")
-
 	c.JSON(http.StatusOK, rocketFlights)
 }
 
+// GetRocketFlightById godoc
+// @Summary Get rocket flight by ID
+// @Description Retrieve a rocket flight and its associated payloads based on the provided ID.
+// @Tags RocketFlights
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the rocket flight"
+// @Success 200 {object} []models.Payload
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /rocket_flights/{id} [get]
 func (h *Handler) GetRocketFlightById(c *gin.Context) {
 	strFlightId := c.Param("id")
 	flightId, err := strconv.Atoi(strFlightId)
@@ -79,6 +101,17 @@ func (h *Handler) GetRocketFlightById(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"rocket_flight": rocket_flight, "payloads": payloads})
 }
 
+// ChangeRocketFlight godoc
+// @Summary Change rocket flight
+// @Description Update the details of a rocket flight.
+// @Tags RocketFlights
+// @Accept json
+// @Produce json
+// @Param flightDetails body models.RocketFlight true "Details of the rocket flight"
+// @Success 200 {string} string "Rocket flight details successfully updated"
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /rocket_flights [put]
 func (h *Handler) ChangeRocketFlight(c *gin.Context) {
 	newRocketFlight := models.RocketFlight{}
 
@@ -88,7 +121,7 @@ func (h *Handler) ChangeRocketFlight(c *gin.Context) {
 		return
 	}
 
-	newRocketFlight.CreatorId = 1
+	newRocketFlight.CreatorId = c.GetInt(userCtx)
 
 	err = h.repo.ChangeRocketFlight(newRocketFlight)
 	if err != nil {
@@ -99,6 +132,17 @@ func (h *Handler) ChangeRocketFlight(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Информация о полёте успешно изменена"})
 }
 
+// FormRocketFlight godoc
+// @Summary Form rocket flight
+// @Description Form a rocket flight.
+// @Tags RocketFlights
+// @Accept json
+// @Produce json
+// @Param flightStatus body models.RocketFlight true "Details of the rocket flight"
+// @Success 200 {string} string "Rocket flight successfully formed"
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /rocket_flights/form [post]
 func (h *Handler) FormRocketFlight(c *gin.Context) {
 	var newFlightStatus models.RocketFlight
 	err := c.BindJSON(&newFlightStatus)
@@ -112,7 +156,7 @@ func (h *Handler) FormRocketFlight(c *gin.Context) {
 		return
 	}
 
-	newFlightStatus.CreatorId = 1
+	newFlightStatus.CreatorId = c.GetInt(userCtx)
 
 	err = h.repo.FormRocketFlight(newFlightStatus)
 	if err != nil {
@@ -123,6 +167,18 @@ func (h *Handler) FormRocketFlight(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Статус успешно изменен на 'formed'"})
 }
 
+// ResponceRocketFlight godoc
+// @Summary Response rocket flight
+// @Description Update the status of a rocket flight.
+// @Tags RocketFlights
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the rocket flight"
+// @Param flightStatus body models.RocketFlight true "New status of the rocket flight"
+// @Success 200 {string} string "Rocket flight status successfully updated"
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /rocket_flights/{id}/response [put]
 func (h *Handler) ResponceRocketFlight(c *gin.Context) {
 	var newFlightStatus models.RocketFlight
 	err := c.BindJSON(&newFlightStatus)
@@ -138,7 +194,7 @@ func (h *Handler) ResponceRocketFlight(c *gin.Context) {
 		return
 	}
 	newFlightStatus.FlightId = flightId
-	newFlightStatus.ModeratorId = 2
+	newFlightStatus.ModeratorId = c.GetInt(userCtx)
 
 	if newFlightStatus.Status != "completed" && newFlightStatus.Status != "rejected" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Поменять статус можно только на 'completed или 'rejected'"})
@@ -153,8 +209,18 @@ func (h *Handler) ResponceRocketFlight(c *gin.Context) {
 	return
 }
 
+// DeleteRocketFlight godoc
+// @Summary Delete rocket flight
+// @Description Delete a rocket flight draft.
+// @Tags RocketFlights
+// @Accept json
+// @Produce json
+// @Success 200 {string} string "Rocket flight draft successfully deleted"
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /rocket_flights [delete]
 func (h *Handler) DeleteRocketFlight(c *gin.Context) {
-	userId := 1
+	userId := c.GetInt(userCtx)
 	err := h.repo.DeleteRocketFlight(userId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())

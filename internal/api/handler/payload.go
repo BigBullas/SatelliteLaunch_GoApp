@@ -12,6 +12,16 @@ import (
 	"RIP_lab1/internal/utils"
 )
 
+// GetPayloadList godoc
+// @Summary Get payload list
+// @Description Retrieve a list of payloads based on the provided query.
+// @Tags Payloads
+// @Accept json
+// @Produce json
+// @Param space_satellite query string false "Query string to filter threats"
+// @Success 200 {object} []models.Payload
+// @Failure 500 {object} error
+// @Router /payloads [get]
 func (h *Handler) GetPayloadList(c *gin.Context) {
 	queryString := c.Request.URL.Query()            // queryString - это тип url.Values, который содержит все query параметры
 	strSearch := queryString.Get("space_satellite") // Получение значения конкретного параметра по его имени
@@ -21,7 +31,7 @@ func (h *Handler) GetPayloadList(c *gin.Context) {
 		log.Println(err)
 	}
 
-	flightId, err := h.repo.GetRocketFlightDraft(1)
+	flightId, err := h.repo.GetRocketFlightDraft(c.GetInt(userCtx))
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -49,6 +59,16 @@ func (h *Handler) GetPayloadList(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"payloads": data, "draftRocketFlightId": flightId})
 }
 
+// GetCardPayloadById godoc
+// @Summary Get card payload by ID
+// @Description Retrieve the payload associated with a specific card ID
+// @Tags Payloads
+// @Accept json
+// @Produce json
+// @Param id path int true "Card ID"
+// @Success 200 {object} models.Payload
+// @Failure 404 {object} error
+// @Router /payloads/{id} [get]
 func (h *Handler) GetCardPayloadById(c *gin.Context) {
 	strCardId := c.Param("id")
 	cardId, err := strconv.Atoi(strCardId)
@@ -67,6 +87,24 @@ func (h *Handler) GetCardPayloadById(c *gin.Context) {
 	})
 }
 
+// CreateNewPayload godoc
+// @Summary Create new payload
+// @Description Create a new payload with the provided details.
+// @Tags Payloads
+// @Accept multipart/form-data
+// @Produce json
+// @Param title formData string true "Title of the payload"
+// @Param image formData file true "Image file of the payload"
+// @Param load_capacity formData string false "Load capacity of the payload"
+// @Param description formData string false "Description of the payload"
+// @Param detailed_description formData string false "Detailed description of the payload"
+// @Param desired_price formData string false "Desired price of the payload"
+// @Param flight_date_start formData string true "Start date of the payload"
+// @Param flight_date_end formData string true "End date of the payload"
+// @Success 201 {string} string "Payload successfully created"
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /payloads [post]
 func (h *Handler) CreateNewPayload(c *gin.Context) {
 	var newPayload models.Payload
 
@@ -165,6 +203,25 @@ func (h *Handler) CreateNewPayload(c *gin.Context) {
 	c.JSON(http.StatusCreated, "Новая полезная нагрузка успешно создана")
 }
 
+// ChangePayload godoc
+// @Summary Update existing payload
+// @Description Update the details of an existing payload.
+// @Tags Payloads
+// @Accept multipart/form-data
+// @Produce json
+// @Param id path int true "ID of the payload"
+// @Param title formData string false "Title of the payload"
+// @Param image formData file false "Image file of the payload"
+// @Param load_capacity formData string false "Load capacity of the payload"
+// @Param description formData string false "Description of the payload"
+// @Param detailed_description formData string false "Detailed description of the payload"
+// @Param desired_price formData string false "Desired price of the payload"
+// @Param flight_date_start formData string false "Start date of the payload"
+// @Param flight_date_end formData string false "End date of the payload"
+// @Success 200 {string} string "Payload successfully updated"
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /payloads/{id} [put]
 func (h *Handler) ChangePayload(c *gin.Context) {
 	file, header, err := c.Request.FormFile("image")
 	if err != nil {
@@ -257,6 +314,17 @@ func (h *Handler) ChangePayload(c *gin.Context) {
 
 }
 
+// DeletePayloadById godoc
+// @Summary Delete payload by ID
+// @Description Delete a payload with the provided ID.
+// @Tags Payloads
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the payload"
+// @Success 200 {string} string "Payload successfully deleted"
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /payloads/{id} [delete]
 func (h *Handler) DeletePayloadById(c *gin.Context) {
 	strCardId := c.Param("id")
 	cardId, err := strconv.Atoi(strCardId)
@@ -277,12 +345,22 @@ func (h *Handler) DeletePayloadById(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/payloads")
 }
 
+// AddPayloadToFlight godoc
+// @Summary Add payload to flight
+// @Description Add a payload to a planned flight.
+// @Tags Payloads
+// @Accept json
+// @Produce json
+// @Param payload body int true "Payload ID and Creator ID"
+// @Success 200 {string} string "Payload added to flight"
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /payloads/rocket_flight [post]
 func (h *Handler) AddPayloadToFlight(c *gin.Context) {
 	var creatorId int
 	var payloadId int
 
 	type RocketFlightShort struct {
-		CreatorId int
 		PayloadId int
 	}
 
@@ -294,7 +372,7 @@ func (h *Handler) AddPayloadToFlight(c *gin.Context) {
 		return
 	}
 
-	creatorId = 1
+	creatorId = c.GetInt(userCtx)
 	payloadId = jsonStr.PayloadId
 
 	if payloadId == 0 {
@@ -312,6 +390,17 @@ func (h *Handler) AddPayloadToFlight(c *gin.Context) {
 	return
 }
 
+// DeletePayloadFromFlight godoc
+// @Summary Remove payload from flight
+// @Description Remove a payload from a planned flight.
+// @Tags Flights Payloads
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the payload"
+// @Success 200 {string} string "Payload removed from flight"
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /flights_payloads/payload/{id} [delete]
 func (h *Handler) DeletePayloadFromFlight(c *gin.Context) {
 	strPayloadId := c.Param("id")
 	payloadId, err := strconv.Atoi(strPayloadId)
@@ -320,7 +409,7 @@ func (h *Handler) DeletePayloadFromFlight(c *gin.Context) {
 		return
 	}
 
-	userId := 1
+	userId := c.GetInt(userCtx)
 
 	err = h.repo.DeletePayloadFromFlight(userId, payloadId)
 	if err != nil {
@@ -330,6 +419,18 @@ func (h *Handler) DeletePayloadFromFlight(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Полезная нагрузка КА успешно удалена из планируемого полёта"})
 }
 
+// ChangeCountFlightsPayload godoc
+// @Summary Change payload count for flight
+// @Description Change the count of a payload for a planned flight.
+// @Tags Flights Payloads
+// @Accept json
+// @Produce json
+// @Param id path int true "ID of the payload"
+// @Param count path int true "New count of the payload"
+// @Success 200 {string} string "Payload count successfully updated"
+// @Failure 400 {object} error
+// @Failure 500 {object} error
+// @Router /flights_payloads/payload/{id}/count/{count} [put]
 func (h *Handler) ChangeCountFlightsPayload(c *gin.Context) {
 	strPayloadId := c.Param("id")
 	payloadId, err := strconv.Atoi(strPayloadId)
@@ -345,7 +446,7 @@ func (h *Handler) ChangeCountFlightsPayload(c *gin.Context) {
 		return
 	}
 
-	userId := 1
+	userId := c.GetInt(userCtx)
 
 	err = h.repo.ChangeCountFlightsPayload(userId, payloadId, count)
 	if err != nil {

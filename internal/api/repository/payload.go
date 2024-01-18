@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"log"
 	"strconv"
 	"time"
 
@@ -97,6 +98,8 @@ func (r *Repository) AddPayloadToFlight(creatorId int, requestId int) error {
 			return res.Error
 		}
 		rocketFlight = newRocketFlights
+		log.Println("flightId", rocketFlight.FlightId)
+		log.Println("payloadId", requestId)
 	}
 
 	payloadFlight := models.FlightsPayload{

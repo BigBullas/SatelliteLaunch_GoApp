@@ -1,0 +1,677 @@
+basePath: /
+definitions:
+  models.Payload:
+    properties:
+      description:
+        type: string
+      desiredPrice:
+        type: number
+      detailedDesc:
+        type: string
+      flightDateEnd:
+        type: string
+      flightDateStart:
+        type: string
+      imgURL:
+        type: string
+      isAvailable:
+        type: boolean
+      loadCapacity:
+        type: number
+      payloadId:
+        type: integer
+      title:
+        type: string
+    type: object
+  models.RocketFlight:
+    properties:
+      confirmedAt:
+        type: string
+      createdAt:
+        type: string
+      creatorId:
+        type: integer
+      creatorLogin:
+        type: string
+      flightDate:
+        type: string
+      flightId:
+        type: integer
+      formedAtomitempty:
+        type: string
+      loadCapacity:
+        type: integer
+      moderatorId:
+        type: integer
+      moderatorLogin:
+        type: string
+      placeNumber:
+        type: integer
+      price:
+        type: number
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  models.User:
+    properties:
+      isAdmin:
+        type: boolean
+      login:
+        maxLength: 64
+        type: string
+      name:
+        type: string
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      userId:
+        type: integer
+    required:
+    - login
+    - password
+    type: object
+  models.UserLogin:
+    properties:
+      login:
+        maxLength: 64
+        type: string
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  models.UserSignUp:
+    properties:
+      login:
+        maxLength: 64
+        type: string
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+    required:
+    - login
+    - password
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Web application on the topic "Launching satellites from the Vostochny
+    cosmodrome"
+  title: Satellite launch application
+  version: "1.0"
+paths:
+  /check-auth:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves user information based on the provided user context
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Check user authentication
+      tags:
+      - Authentication
+  /flights_payloads/payload/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a payload from a planned flight.
+      parameters:
+      - description: ID of the payload
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payload removed from flight
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Remove payload from flight
+      tags:
+      - Flights Payloads
+  /flights_payloads/payload/{id}/count/{count}:
+    put:
+      consumes:
+      - application/json
+      description: Change the count of a payload for a planned flight.
+      parameters:
+      - description: ID of the payload
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New count of the payload
+        in: path
+        name: count
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payload count successfully updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Change payload count for flight
+      tags:
+      - Flights Payloads
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Logs out the user by blacklisting the access token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: Logout
+      tags:
+      - Authentication
+  /payloads:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of payloads based on the provided query.
+      parameters:
+      - description: Query string to filter threats
+        in: query
+        name: space_satellite
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Payload'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get payload list
+      tags:
+      - Payloads
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a new payload with the provided details.
+      parameters:
+      - description: Title of the payload
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Image file of the payload
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: Load capacity of the payload
+        in: formData
+        name: load_capacity
+        type: string
+      - description: Description of the payload
+        in: formData
+        name: description
+        type: string
+      - description: Detailed description of the payload
+        in: formData
+        name: detailed_description
+        type: string
+      - description: Desired price of the payload
+        in: formData
+        name: desired_price
+        type: string
+      - description: Start date of the payload
+        in: formData
+        name: flight_date_start
+        required: true
+        type: string
+      - description: End date of the payload
+        in: formData
+        name: flight_date_end
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Payload successfully created
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create new payload
+      tags:
+      - Payloads
+  /payloads/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a payload with the provided ID.
+      parameters:
+      - description: ID of the payload
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payload successfully deleted
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Delete payload by ID
+      tags:
+      - Payloads
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the payload associated with a specific card ID
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Payload'
+        "404":
+          description: Not Found
+          schema: {}
+      summary: Get card payload by ID
+      tags:
+      - Payloads
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update the details of an existing payload.
+      parameters:
+      - description: ID of the payload
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Title of the payload
+        in: formData
+        name: title
+        type: string
+      - description: Image file of the payload
+        in: formData
+        name: image
+        type: file
+      - description: Load capacity of the payload
+        in: formData
+        name: load_capacity
+        type: string
+      - description: Description of the payload
+        in: formData
+        name: description
+        type: string
+      - description: Detailed description of the payload
+        in: formData
+        name: detailed_description
+        type: string
+      - description: Desired price of the payload
+        in: formData
+        name: desired_price
+        type: string
+      - description: Start date of the payload
+        in: formData
+        name: flight_date_start
+        type: string
+      - description: End date of the payload
+        in: formData
+        name: flight_date_end
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payload successfully updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Update existing payload
+      tags:
+      - Payloads
+  /payloads/rocket_flight:
+    post:
+      consumes:
+      - application/json
+      description: Add a payload to a planned flight.
+      parameters:
+      - description: Payload ID and Creator ID
+        in: body
+        name: payload
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payload added to flight
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Add payload to flight
+      tags:
+      - Payloads
+  /ping:
+    get:
+      description: very very friendly response
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Show hello text
+      tags:
+      - Tests
+  /rocket_flights:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a rocket flight draft.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Rocket flight draft successfully deleted
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Delete rocket flight
+      tags:
+      - RocketFlights
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of rocket flights based on the provided query parameters.
+      parameters:
+      - description: Start date of the formation period
+        in: query
+        name: form_date_start
+        type: string
+      - description: End date of the formation period
+        in: query
+        name: form_date_end
+        type: string
+      - description: Status of the flight
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/models.RocketFlight'
+              type: array
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get rocket flight list
+      tags:
+      - RocketFlights
+    put:
+      consumes:
+      - application/json
+      description: Update the details of a rocket flight.
+      parameters:
+      - description: Details of the rocket flight
+        in: body
+        name: flightDetails
+        required: true
+        schema:
+          $ref: '#/definitions/models.RocketFlight'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Rocket flight details successfully updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Change rocket flight
+      tags:
+      - RocketFlights
+  /rocket_flights/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a rocket flight and its associated payloads based on the
+        provided ID.
+      parameters:
+      - description: ID of the rocket flight
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Payload'
+            type: array
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get rocket flight by ID
+      tags:
+      - RocketFlights
+  /rocket_flights/{id}/response:
+    put:
+      consumes:
+      - application/json
+      description: Update the status of a rocket flight.
+      parameters:
+      - description: ID of the rocket flight
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status of the rocket flight
+        in: body
+        name: flightStatus
+        required: true
+        schema:
+          $ref: '#/definitions/models.RocketFlight'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Rocket flight status successfully updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Response rocket flight
+      tags:
+      - RocketFlights
+  /rocket_flights/form:
+    post:
+      consumes:
+      - application/json
+      description: Form a rocket flight.
+      parameters:
+      - description: Details of the rocket flight
+        in: body
+        name: flightStatus
+        required: true
+        schema:
+          $ref: '#/definitions/models.RocketFlight'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Rocket flight successfully formed
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Form rocket flight
+      tags:
+      - RocketFlights
+  /sign_in:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and generates an access token
+      parameters:
+      - description: User information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema: {}
+        "401":
+          description: Unauthorized
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: User sign-in
+      tags:
+      - Authentication
+  /sign_up:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account
+      parameters:
+      - description: User information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserSignUp'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema: {}
+        "409":
+          description: Conflict
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Sign up a new user
+      tags:
+      - Authentication
+schemes:
+- http
+swagger: "2.0"

@@ -2,6 +2,7 @@ package api
 
 import (
 	"RIP_lab1/internal/models"
+	"context"
 	"time"
 )
 
@@ -24,4 +25,8 @@ type Repo interface {
 	FormRocketFlight(models.RocketFlight) error
 	ResponceRocketFlight(models.RocketFlight) error
 	DeleteRocketFlight(int) error
+
+	SignUp(ctx context.Context, newUser models.User) error
+	GetByCredentials(ctx context.Context, user models.User) (models.User, error)
+	GetUserInfo(ctx context.Context, user models.User) (models.User, error)
 }
