@@ -231,11 +231,11 @@ func (r *Repository) ChangeRocketFlight(changedRocketFlight models.RocketFlight)
 	return result.Error
 }
 
-func (r *Repository) FormRocketFlight(newRocketStatus models.RocketFlight) error {
+func (r *Repository) FormRocketFlight(newRocketStatus models.RocketFlight) (int, error) {
 	var rocketFlight models.RocketFlight
 	err := r.db.First(&rocketFlight, "creator_id = ? and status = 'draft'", newRocketStatus.CreatorId)
 	if err.Error != nil {
-		return err.Error
+		return 0, err.Error
 	}
 
 	rocketFlight.Status = newRocketStatus.Status
@@ -243,7 +243,7 @@ func (r *Repository) FormRocketFlight(newRocketStatus models.RocketFlight) error
 
 	result := r.db.Save(&rocketFlight)
 
-	return result.Error
+	return rocketFlight.FlightId, result.Error
 }
 
 func (r *Repository) ResponceRocketFlight(newFlightStatus models.RocketFlight) error {
@@ -277,4 +277,15 @@ func (r *Repository) DeleteRocketFlight(userId int) error {
 	rocketFlight.Status = "deleted"
 	result = r.db.Save(rocketFlight)
 	return result.Error
+}
+
+func (r *Repository) FinishCalculating(flightAsync models.FlightAsync) error {
+	var rocket_flight models.RocketFlight
+	err := r.db.First(&rocket_flight, "flight_id = ?", flightAsync.Id)
+	if err.Error != nil {
+		return err.Error
+	}
+	rocket_flight.Price = float64(flightAsync.CalculatedPrice)
+	res := r.db.Save(&rocket_flight)
+	return res.Error
 }

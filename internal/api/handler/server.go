@@ -80,7 +80,7 @@ func NewHandler(logger *logrus.Logger) *Handler {
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		// c.Writer.Header().Set("Access-Control-Allow-Origin", ["http://localhost:3000", "http://localhost:8081"])
 		// c.Writer.Header().Set("Access-Control-Allow-Methods", "POST,PUT,DELETE,GET")
 		// c.Writer.Header().Set("Access-Control-Allow-Headers", "POST,PUT,DELETE,GET")
 		// w.Header().Set("Access-Control-Allow-Methods", "POST,PUT,DELETE,GET")
@@ -92,7 +92,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		// 	return
 		// }
 
-		// c.Writer.Header().Set("Access-Control-Allow-Origin", c.GetHeader("Origin"))
+		c.Writer.Header().Set("Access-Control-Allow-Origin", c.GetHeader("Origin"))
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
@@ -136,6 +136,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r.PUT("/rocket_flights/form", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.FormRocketFlight)
 	r.PUT("/rocket_flights/:id/response", h.WithAuthCheck([]models.Role{models.Admin}), h.ResponceRocketFlight)
 	r.DELETE("/rocket_flights", h.WithAuthCheck([]models.Role{models.Client}), h.DeleteRocketFlight)
+	// async service
+	r.PUT("rocket_flights/finish_calculating", h.FinishCalculating)
 
 	// формирование информации о будущем полёте через полезные нагрузки
 	r.POST("/payloads/rocket_flight", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.AddPayloadToFlight)
@@ -144,6 +146,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r.DELETE("/flights_payloads/payload/:id", h.WithAuthCheck([]models.Role{models.Client}), h.DeletePayloadFromFlight)
 	r.PUT("/flights_payloads/payload/:id/count/:count", h.WithAuthCheck([]models.Role{models.Client}), h.ChangeCountFlightsPayload)
 
+	//user
 	r.POST("/sign_in", h.SignIn)
 	r.POST("/sign_up", h.SignUp)
 	r.POST("/logout", h.Logout)

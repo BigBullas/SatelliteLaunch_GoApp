@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -145,6 +148,7 @@ func (h *Handler) ChangeRocketFlight(c *gin.Context) {
 // @Router /rocket_flights/form [post]
 func (h *Handler) FormRocketFlight(c *gin.Context) {
 	var newFlightStatus models.RocketFlight
+	var flightId int
 	err := c.BindJSON(&newFlightStatus)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
@@ -158,10 +162,15 @@ func (h *Handler) FormRocketFlight(c *gin.Context) {
 
 	newFlightStatus.CreatorId = c.GetInt(userCtx)
 
-	err = h.repo.FormRocketFlight(newFlightStatus)
+	flightId, err = h.repo.FormRocketFlight(newFlightStatus)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 		return
+	}
+
+	err = h.StartScanning(flightId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"mesage": err})
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Статус успешно изменен на 'formed'"})
@@ -227,4 +236,51 @@ func (h *Handler) DeleteRocketFlight(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Заявка-черновик успешно удалена"})
+}
+
+func (h *Handler) StartScanning(flightId int) error {
+	var flightAsync models.FlightAsync
+	flightAsync.Id = flightId
+	body, _ := json.Marshal(flightAsync)
+
+	asyncServer := &http.Client{}
+	req, err := http.NewRequest("PUT", "http://127.0.0.1:8081/calculate/", bytes.NewBuffer(body))
+	if err != nil {
+		return errors.New("Ошибка при создании запроса в бухгалтерию")
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := asyncServer.Do(req)
+	if err != nil {
+		return errors.New("ошибка при отправке запроса в бухгалтерию")
+	}
+
+	if resp.StatusCode == 200 {
+		return nil
+	}
+
+	return errors.New("Запрос не принят в обработку")
+}
+
+func (h *Handler) FinishCalculating(c *gin.Context) {
+	const token = "qwertyuiop[]=-0987654321!@#$%^"
+	var flightAsync models.FlightAsync
+	if err := c.BindJSON(&flightAsync); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		h.logger.Println(err)
+		return
+	}
+
+	if flightAsync.Token != token {
+		c.AbortWithError(http.StatusForbidden, errors.New("Неверный токен"))
+		return
+	}
+
+	err := h.repo.FinishCalculating(flightAsync)
+	if err != nil {
+		h.logger.Println(err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Данные сохранены"})
 }

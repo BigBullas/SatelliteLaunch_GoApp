@@ -18,3 +18,9 @@ type RocketFlight struct {
 	Title          string    `json:"title,omitempty"`
 	PlaceNumber    int       `json:"placeNumber,omitempty"`
 }
+
+type FlightAsync struct {
+	Id              int    `json:"flight_id"`
+	CalculatedPrice int    `json:"calculated_price"`
+	Token           string `json:"token"`
+}

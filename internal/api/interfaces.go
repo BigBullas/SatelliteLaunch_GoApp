@@ -22,9 +22,10 @@ type Repo interface {
 	GetRocketFlightDraft(int) (int, error)
 	GetRocketFlightById(int) (models.RocketFlight, []models.Payload, error)
 	ChangeRocketFlight(models.RocketFlight) error
-	FormRocketFlight(models.RocketFlight) error
+	FormRocketFlight(models.RocketFlight) (int, error)
 	ResponceRocketFlight(models.RocketFlight) error
 	DeleteRocketFlight(int) error
+	FinishCalculating(models.FlightAsync) error
 
 	SignUp(ctx context.Context, newUser models.User) error
 	GetByCredentials(ctx context.Context, user models.User) (models.User, error)
