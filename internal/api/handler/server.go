@@ -24,6 +24,22 @@ func (h *Handler) StartServer() {
 	h.logger.Println("Server start up")
 
 	r := gin.Default()
+
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST,PUT,DELETE,GET")
+		// c.Writer.Header().Set("Access-Control-Allow-Headers", "POST,PUT,DELETE,GET")
+		// w.Header().Set("Access-Control-Allow-Methods", "POST,PUT,DELETE,GET")
+		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type,X-CSRF-Token")
+		// w.Header().Set("Access-Control-Allow-Credentials", "true")
+		// w.Header().Set("Access-Control-Expose-Headers", "X-CSRF-Token")
+		// w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+		// if r.Method == http.MethodOptions {
+		// 	return
+		// }
+		c.Next()
+	})
+
 	r.GET("/ping", h.Ping)
 
 	r.LoadHTMLGlob("templates/*")
