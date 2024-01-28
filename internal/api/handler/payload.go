@@ -71,20 +71,22 @@ func (h *Handler) GetPayloadList(c *gin.Context) {
 // @Router /payloads/{id} [get]
 func (h *Handler) GetCardPayloadById(c *gin.Context) {
 	strCardId := c.Param("id")
-	cardId, err := strconv.Atoi(strCardId)
+	payloadId, err := strconv.Atoi(strCardId)
 	if err != nil {
 		log.Println("Ошибка при преобразовании строки в число:", err)
 		return
 	}
 
-	card, err := h.repo.GetCardPayloadById(cardId)
+	payload, err := h.repo.GetCardPayloadById(payloadId)
 	if err != nil {
 		log.Println(err)
 	}
 
-	c.HTML(http.StatusOK, "card_launch_vehicle.gohtml", gin.H{
-		"card": card,
-	})
+	c.JSON(http.StatusOK, gin.H{"payload": payload})
+
+	// c.HTML(http.StatusOK, "card_launch_vehicle.gohtml", gin.H{
+	// 	"card": payload,
+	// })
 }
 
 // CreateNewPayload godoc

@@ -26,7 +26,7 @@ func main() {
 
 	handler := handler.NewHandler(logger)
 	r := handler.InitRoutes()
-	err := r.Run("localhost:8080")
+	err := r.Run("192.168.0.107:8080")
 	if err != nil {
 		logger.Fatalln(err)
 	}
