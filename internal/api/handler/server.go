@@ -112,13 +112,14 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
-	r.GET("/ping", h.Ping)
-
 	r.LoadHTMLGlob("templates/*")
 
 	r.Static("/image", "./resources")
 	r.Static("/style", "./style")
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	r.GET("/ping", h.Ping)
+	
 	// полезные нагрузки
 	r.GET("/payloads", h.WithAuthCheck([]models.Role{}), h.GetPayloadList)
 	r.GET("/payloads/:id", h.GetCardPayloadById)
