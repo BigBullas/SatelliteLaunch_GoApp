@@ -111,7 +111,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r.GET("/ping", h.Ping)
 
 	// полезные нагрузки
-	r.GET("/payloads", h.GetPayloadList)
+	r.GET("/payloads", h.WithAuthCheck([]models.Role{}), h.GetPayloadList)
 	r.GET("/payloads/:id", h.GetCardPayloadById)
 	r.POST("/payloads", h.WithAuthCheck([]models.Role{models.Admin}), h.CreateNewPayload)
 	r.PUT("/payloads/:id", h.WithAuthCheck([]models.Role{models.Admin}), h.ChangePayload)
