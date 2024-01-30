@@ -106,8 +106,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r.Static("/style", "./style")
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// api := r.Group("api")
-
 	r.GET("/ping", h.Ping)
 
 	// полезные нагрузки
@@ -136,6 +134,14 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	// m-m
 	r.DELETE("/flights_payloads/payload/:id", h.WithAuthCheck([]models.Role{models.Client}), h.DeletePayloadFromFlight)
 	r.PUT("/flights_payloads/payload/:id/count/:count", h.WithAuthCheck([]models.Role{models.Client}), h.ChangeCountFlightsPayload)
+
+	//user
+	r.POST("/sign_in", h.SignIn)
+	r.POST("/sign_up", h.SignUp)
+	r.POST("/logout", h.Logout)
+
+	// для фронта на будущее
+	r.GET("/check-auth", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.CheckAuth)
 
 	return r
 }
