@@ -7,7 +7,7 @@ import (
 )
 
 type Repo interface {
-	GetPayloadList(string) ([]models.Payload, error)
+	GetPayloadList(string, string, string, string, string) ([]models.Payload, error)
 	GetCardPayloadById(int) (models.Payload, error)
 	CreateNewPayload(models.Payload) error
 	ChangePayload(models.Payload) error
