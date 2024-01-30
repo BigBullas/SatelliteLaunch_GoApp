@@ -25,8 +25,12 @@ import (
 func (h *Handler) GetPayloadList(c *gin.Context) {
 	queryString := c.Request.URL.Query()            // queryString - это тип url.Values, который содержит все query параметры
 	strSearch := queryString.Get("space_satellite") // Получение значения конкретного параметра по его имени
+	strLoadCapacityStart := queryString.Get("load_capacity_start")
+	strLoadCapacityEnd := queryString.Get("load_capacity_end")
+	strFlightDateStart := queryString.Get("flight_date_start")
+	strFlightDateEnd := queryString.Get("flight_date_end")
 
-	data, err := h.repo.GetPayloadList(strSearch)
+	data, err := h.repo.GetPayloadList(strSearch, strLoadCapacityStart, strLoadCapacityEnd, strFlightDateStart, strFlightDateEnd)
 	if err != nil {
 		log.Println(err)
 	}
@@ -70,8 +74,8 @@ func (h *Handler) GetPayloadList(c *gin.Context) {
 // @Failure 404 {object} error
 // @Router /payloads/{id} [get]
 func (h *Handler) GetCardPayloadById(c *gin.Context) {
-	strCardId := c.Param("id")
-	payloadId, err := strconv.Atoi(strCardId)
+	strPayloadId := c.Param("id")
+	payloadId, err := strconv.Atoi(strPayloadId)
 	if err != nil {
 		log.Println("Ошибка при преобразовании строки в число:", err)
 		return
@@ -83,10 +87,6 @@ func (h *Handler) GetCardPayloadById(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"payload": payload})
-
-	// c.HTML(http.StatusOK, "card_launch_vehicle.gohtml", gin.H{
-	// 	"card": payload,
-	// })
 }
 
 // CreateNewPayload godoc

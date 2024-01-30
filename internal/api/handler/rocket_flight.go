@@ -264,19 +264,17 @@ func (h *Handler) StartScanning(flightId int) error {
 }
 
 func (h *Handler) FinishCalculating(c *gin.Context) {
-	const token = "qwertyuiop[]=-0987654321!@#$%^"
+	const token = "qwertyuioplkjhgfdsa0987654321"
 	var flightAsync models.FlightAsync
 	if err := c.BindJSON(&flightAsync); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		h.logger.Println(err)
 		return
 	}
-
 	if flightAsync.Token != token {
 		c.AbortWithError(http.StatusForbidden, errors.New("Неверный токен"))
 		return
 	}
-
 	err := h.repo.FinishCalculating(flightAsync)
 	if err != nil {
 		h.logger.Println(err)
