@@ -25,8 +25,12 @@ import (
 func (h *Handler) GetPayloadList(c *gin.Context) {
 	queryString := c.Request.URL.Query()            // queryString - это тип url.Values, который содержит все query параметры
 	strSearch := queryString.Get("space_satellite") // Получение значения конкретного параметра по его имени
+	strLoadCapacityStart := queryString.Get("load_capacity_start")
+	strLoadCapacityEnd := queryString.Get("load_capacity_end")
+	strFlightDateStart := queryString.Get("flight_date_start")
+	strFlightDateEnd := queryString.Get("flight_date_end")
 
-	data, err := h.repo.GetPayloadList(strSearch)
+	data, err := h.repo.GetPayloadList(strSearch, strLoadCapacityStart, strLoadCapacityEnd, strFlightDateStart, strFlightDateEnd)
 	if err != nil {
 		log.Println(err)
 	}

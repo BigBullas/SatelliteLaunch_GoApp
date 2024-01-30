@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -9,10 +10,28 @@ import (
 	"RIP_lab1/internal/models"
 )
 
-func (r *Repository) GetPayloadList(substring string) ([]models.Payload, error) {
+func (r *Repository) GetPayloadList(substring string, loadCapacityStart string,
+	loadCapacityEnd string, flightDateStart string, flightDateEnd string) ([]models.Payload, error) {
 	var request_for_delivery []models.Payload
+	queryParametrs := "is_available = true"
 
-	r.db.Where("title ILIKE ?", "%"+substring+"%").Find(&request_for_delivery, "is_available = ?", true)
+	if loadCapacityStart != "" {
+		queryParametrs = fmt.Sprintf(queryParametrs+" AND load_capacity >= '%s'", loadCapacityStart)
+	}
+
+	if loadCapacityEnd != "" {
+		queryParametrs = fmt.Sprintf(queryParametrs+" AND load_capacity <= '%s'", loadCapacityEnd)
+	}
+
+	if flightDateStart != "" {
+		queryParametrs = fmt.Sprintf(queryParametrs+" AND flight_date_end >= '%s'", flightDateStart)
+	}
+
+	if flightDateEnd != "" {
+		queryParametrs = fmt.Sprintf(queryParametrs+" AND flight_date_start <= '%s'", flightDateEnd)
+	}
+
+	r.db.Where("title ILIKE ?", "%"+substring+"%").Find(&request_for_delivery, queryParametrs)
 	return request_for_delivery, nil
 }
 

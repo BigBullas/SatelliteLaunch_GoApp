@@ -80,19 +80,7 @@ func NewHandler(logger *logrus.Logger) *Handler {
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// c.Writer.Header().Set("Access-Control-Allow-Origin", ["http://localhost:3000", "http://localhost:8081"])
-		// c.Writer.Header().Set("Access-Control-Allow-Methods", "POST,PUT,DELETE,GET")
-		// c.Writer.Header().Set("Access-Control-Allow-Headers", "POST,PUT,DELETE,GET")
-		// w.Header().Set("Access-Control-Allow-Methods", "POST,PUT,DELETE,GET")
-		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type,X-CSRF-Token")
-		// w.Header().Set("Access-Control-Allow-Credentials", "true")
-		// w.Header().Set("Access-Control-Expose-Headers", "X-CSRF-Token")
-		// w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-		// if r.Method == http.MethodOptions {
-		// 	return
-		// }
-
-		c.Writer.Header().Set("Access-Control-Allow-Origin", c.GetHeader("Origin"))
+		c.Writer.Header().Set("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
@@ -118,10 +106,12 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r.Static("/style", "./style")
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// api := r.Group("api")
+
 	r.GET("/ping", h.Ping)
-	
+
 	// полезные нагрузки
-	r.GET("/payloads", h.WithAuthCheck([]models.Role{}), h.GetPayloadList)
+	r.GET("/payloads", h.GetPayloadList)
 	r.GET("/payloads/:id", h.GetCardPayloadById)
 	r.POST("/payloads", h.WithAuthCheck([]models.Role{models.Admin}), h.CreateNewPayload)
 	r.PUT("/payloads/:id", h.WithAuthCheck([]models.Role{models.Admin}), h.ChangePayload)
@@ -146,14 +136,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	// m-m
 	r.DELETE("/flights_payloads/payload/:id", h.WithAuthCheck([]models.Role{models.Client}), h.DeletePayloadFromFlight)
 	r.PUT("/flights_payloads/payload/:id/count/:count", h.WithAuthCheck([]models.Role{models.Client}), h.ChangeCountFlightsPayload)
-
-	//user
-	r.POST("/sign_in", h.SignIn)
-	r.POST("/sign_up", h.SignUp)
-	r.POST("/logout", h.Logout)
-
-	// для фронта на будущее
-	r.GET("/check-auth", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.CheckAuth)
 
 	return r
 }
