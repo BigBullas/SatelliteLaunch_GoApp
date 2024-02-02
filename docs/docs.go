@@ -860,28 +860,28 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "desiredPrice": {
+                "desired_price": {
                     "type": "number"
                 },
-                "detailedDesc": {
+                "detailed_desc": {
                     "type": "string"
                 },
-                "flightDateEnd": {
+                "flight_date_end": {
                     "type": "string"
                 },
-                "flightDateStart": {
+                "flight_date_start": {
                     "type": "string"
                 },
-                "imgURL": {
+                "img_url": {
                     "type": "string"
                 },
-                "isAvailable": {
+                "is_available": {
                     "type": "boolean"
                 },
-                "loadCapacity": {
+                "load_capacity": {
                     "type": "number"
                 },
-                "payloadId": {
+                "payload_id": {
                     "type": "integer"
                 },
                 "title": {
@@ -956,7 +956,7 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "maxLength": 64,
-                    "minLength": 8
+                    "minLength": 6
                 },
                 "userId": {
                     "type": "integer"
