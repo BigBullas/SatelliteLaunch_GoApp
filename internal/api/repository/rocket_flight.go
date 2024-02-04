@@ -21,13 +21,25 @@ func (r *Repository) GetLoginsForFlights(rocketFlights []models.RocketFlight) ([
 	var err error
 
 	for i := range rocketFlights {
-		creator, err = r.GetUserByUserId(rocketFlights[i].CreatorId)
-		moderator, err = r.GetUserByUserId(rocketFlights[i].ModeratorId)
-		if err != nil {
-			return rocketFlights, err
+		if rocketFlights[i].CreatorId != 0 {
+			creator, err = r.GetUserByUserId(rocketFlights[i].CreatorId)
+			rocketFlights[i].CreatorLogin = creator.Login
+			if err != nil {
+				return rocketFlights, err
+			}
+		} else {
+			rocketFlights[i].CreatorLogin = ""
 		}
-		rocketFlights[i].CreatorLogin = creator.Login
-		rocketFlights[i].ModeratorLogin = moderator.Login
+
+		if rocketFlights[i].ModeratorId != 0 {
+			moderator, err = r.GetUserByUserId(rocketFlights[i].ModeratorId)
+			rocketFlights[i].ModeratorLogin = moderator.Login
+			if err != nil {
+				return rocketFlights, err
+			}
+		} else {
+			rocketFlights[i].ModeratorLogin = ""
+		}
 	}
 
 	return rocketFlights, nil

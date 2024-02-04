@@ -98,7 +98,7 @@ func (r *Repository) DeletePayloadById(cardId int) error {
 	return nil
 }
 
-func (r *Repository) AddPayloadToFlight(creatorId int, requestId int) error {
+func (r *Repository) AddPayloadToFlight(creatorId int, requestId int) (int, error) {
 	var rocketFlight models.RocketFlight
 
 	r.db.Where("creator_id = ?", creatorId).Where("status = ?", "draft").First(&rocketFlight)
@@ -108,13 +108,13 @@ func (r *Repository) AddPayloadToFlight(creatorId int, requestId int) error {
 	if rocketFlight.FlightId == 0 {
 		newRocketFlights := models.RocketFlight{
 			CreatorId:   creatorId,
-			ModeratorId: 2,
+			ModeratorId: 0,
 			Status:      "draft",
 			CreatedAt:   time.Now(),
 		}
 		res := r.db.Create(&newRocketFlights)
 		if res.Error != nil {
-			return res.Error
+			return 0, res.Error
 		}
 		rocketFlight = newRocketFlights
 		log.Println("flightId", rocketFlight.FlightId)
@@ -129,10 +129,10 @@ func (r *Repository) AddPayloadToFlight(creatorId int, requestId int) error {
 
 	res := r.db.Create(&payloadFlight)
 	if res.Error != nil && res.Error.Error() == "ERROR: duplicate key value violates unique constraint \"flights_payloads_pkey\" (SQLSTATE 23505)" {
-		return errors.New("Данная полезная нагрузка уже добавлена в планируемый полёт")
+		return 0, errors.New("Данная полезная нагрузка уже добавлена в планируемый полёт")
 	}
 
-	return res.Error
+	return rocketFlight.FlightId, res.Error
 }
 
 func (r *Repository) DeletePayloadFromFlight(userId int, requestId int) error {

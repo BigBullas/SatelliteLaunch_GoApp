@@ -25,4 +25,5 @@ type UserLogin struct {
 type UserSignUp struct {
 	Login    string `json:"login" binding:"required,max=64"`
 	Password string `json:"password" binding:"required,min=8,max=64"`
+	Email string `json:"email"`
 }

@@ -156,7 +156,7 @@ const docTemplate = `{
         },
         "/payloads": {
             "get": {
-                "description": "Retrieve a list of payloads based on the provided query.",
+                "description": "Retrieves a list of payloads based on the provided filters",
                 "consumes": [
                     "application/json"
                 ],
@@ -166,12 +166,36 @@ const docTemplate = `{
                 "tags": [
                     "Payloads"
                 ],
-                "summary": "Get payload list",
+                "summary": "Get Payload List",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Query string to filter threats",
+                        "description": "Space Satellite",
                         "name": "space_satellite",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Load Capacity Start",
+                        "name": "load_capacity_start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Load Capacity End",
+                        "name": "load_capacity_end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Flight Date Start",
+                        "name": "flight_date_start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Flight Date End",
+                        "name": "flight_date_end",
                         "in": "query"
                     }
                 ],
@@ -277,7 +301,7 @@ const docTemplate = `{
         },
         "/payloads/rocket_flight": {
             "post": {
-                "description": "Add a payload to a planned flight.",
+                "description": "Adds a specified payload to a planned flight. The user must provide their creator ID and the payload ID in the request body.",
                 "consumes": [
                     "application/json"
                 ],
@@ -287,10 +311,10 @@ const docTemplate = `{
                 "tags": [
                     "Payloads"
                 ],
-                "summary": "Add payload to flight",
+                "summary": "Add Payload to Flight",
                 "parameters": [
                     {
-                        "description": "Payload ID and Creator ID",
+                        "description": "Payload ID to be added to the flight",
                         "name": "payload",
                         "in": "body",
                         "required": true,
@@ -301,17 +325,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Payload added to flight",
+                        "description": "The ID of the draft flight after adding the payload",
                         "schema": {
-                            "type": "string"
+                            "type": "integer"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
                         "schema": {}
                     }
                 }
@@ -490,6 +510,60 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update the profile of the currently logged-in user. Allows changing login, password, and email.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Update Profile",
+                "parameters": [
+                    {
+                        "description": "Updated user profile data",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserSignUp"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -805,9 +879,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/sign_up": {
+        "/signup": {
             "post": {
-                "description": "Creates a new user account",
+                "description": "Register a new user account. The user will receive a JWT token upon successful registration.",
                 "consumes": [
                     "application/json"
                 ],
@@ -820,7 +894,7 @@ const docTemplate = `{
                 "summary": "Sign up a new user",
                 "parameters": [
                     {
-                        "description": "User information",
+                        "description": "User sign up data",
                         "name": "user",
                         "in": "body",
                         "required": true,
@@ -831,23 +905,25 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "User successfully registered",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
-                        "schema": {}
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {}
+                        "description": "Bad request error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
                     },
                     "500": {
-                        "description": "Internal Server Error",
-                        "schema": {}
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
                     }
                 }
             }
@@ -892,37 +968,37 @@ const docTemplate = `{
         "models.RocketFlight": {
             "type": "object",
             "properties": {
-                "confirmedAt": {
+                "confirmed_at": {
                     "type": "string"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "creatorId": {
+                "creator_id": {
                     "type": "integer"
                 },
-                "creatorLogin": {
+                "creator_login": {
                     "type": "string"
                 },
-                "flightDate": {
+                "flight_date": {
                     "type": "string"
                 },
-                "flightId": {
+                "flight_id": {
                     "type": "integer"
                 },
-                "formedAtomitempty": {
+                "formed_at": {
                     "type": "string"
                 },
-                "loadCapacity": {
+                "load_capacity": {
+                    "type": "number"
+                },
+                "moderator_id": {
                     "type": "integer"
                 },
-                "moderatorId": {
-                    "type": "integer"
-                },
-                "moderatorLogin": {
+                "moderator_login": {
                     "type": "string"
                 },
-                "placeNumber": {
+                "place_number": {
                     "type": "integer"
                 },
                 "price": {
@@ -943,15 +1019,15 @@ const docTemplate = `{
                 "password"
             ],
             "properties": {
-                "isAdmin": {
+                "email": {
+                    "type": "string"
+                },
+                "is_admin": {
                     "type": "boolean"
                 },
                 "login": {
                     "type": "string",
                     "maxLength": 64
-                },
-                "name": {
-                    "type": "string"
                 },
                 "password": {
                     "type": "string",
@@ -988,6 +1064,9 @@ const docTemplate = `{
                 "password"
             ],
             "properties": {
+                "email": {
+                    "type": "string"
+                },
                 "login": {
                     "type": "string",
                     "maxLength": 64

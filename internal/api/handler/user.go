@@ -1,28 +1,28 @@
 package handler
 
 import (
+	"RIP_lab1/internal/models"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"strings"
-	"RIP_lab1/internal/models"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 // SignUp godoc
 // @Summary      Sign up a new user
-// @Description  Creates a new user account
-// @Tags         Authentication
-// @Accept       json
-// @Produce      json
-// @Param        user  body  models.UserSignUp  true  "User information"
-// @Success      201  {object}  map[string]any
-// @Failure      400  {object}  error
-// @Failure      409  {object}  error
-// @Failure      500  {object}  error
-// @Router       /sign_up [post]
+// @Description Register a new user account. The user will receive a JWT token upon successful registration.
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param user body models.UserSignUp true "User sign up data"
+// @Success 201 {object} map[string]interface{} "User successfully registered"
+// @Failure 400 {object} map[string]interface{} "Bad request error"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /signup [post]
 func (h *Handler) SignUp(c *gin.Context) {
 	var newClient models.UserSignUp
 	var err error
@@ -37,15 +37,27 @@ func (h *Handler) SignUp(c *gin.Context) {
 		return
 	}
 
-	if err = h.repo.SignUp(c.Request.Context(), models.User{
+	userId, isAdmin, err := h.repo.SignUp(c.Request.Context(), models.User{
 		Login:    newClient.Login,
 		Password: newClient.Password,
-	}); err != nil {
+		Email:    newClient.Email,
+	})
+
+	h.logger.Println("Created user: ", userId, isAdmin, newClient.Login)
+
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Нельзя создать пользователя с таким логином"})
 
 		return
 	}
 
+	token, err := h.tokenManager.NewJWT(userId, isAdmin)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "ошибка при формировании токена"})
+		return
+	}
+
+	c.SetCookie("AccessToken", "Bearer "+token, 0, "/", "localhost", false, true)
 	c.JSON(http.StatusCreated, gin.H{"message": "Пользователь успешно создан"})
 }
 
@@ -114,7 +126,7 @@ func (h *Handler) SignIn(c *gin.Context) {
 	}
 
 	c.SetCookie("AccessToken", "Bearer "+token, 0, "/", "localhost", false, true)
-	c.JSON(http.StatusOK, gin.H{"message": "клиент успешно авторизован", "isAdmin": user.IsAdmin, "login": user.Login, "userId": user.UserId})
+	c.JSON(http.StatusOK, gin.H{"message": "клиент успешно авторизован", "is_admin": user.IsAdmin, "login": user.Login, "userId": user.UserId})
 }
 
 // Logout godoc
@@ -149,4 +161,48 @@ func (h *Handler) Logout(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+// ChangeProfile godoc
+// @Summary Update Profile
+// @Description Update the profile of the currently logged-in user. Allows changing login, password, and email.
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param user body models.UserSignUp true "Updated user profile data"
+// @Success 200 {object} map[string]interface{} "Profile updated successfully"
+// @Failure 400 {object} map[string]interface{} "Bad request error"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /profile [put]
+func (h *Handler) ChangeProfile(c *gin.Context) {
+	var changedClient models.UserSignUp
+	var err error
+
+	if err = c.BindJSON(&changedClient); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Неверный формат обновлённых данных пользователе"})
+		return
+	}
+
+	if changedClient.Password != "" {
+		if changedClient.Password, err = h.hasher.Hash(changedClient.Password); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Неверный формат пароля"})
+			return
+		}
+	}
+
+	err = h.repo.ChangeProfile(c.Request.Context(), models.User{
+		Login:    changedClient.Login,
+		Password: changedClient.Password,
+		Email:    changedClient.Email,
+	})
+
+	h.logger.Println("Changed user: ", changedClient)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Нельзя изменить пользователя на такой логин"})
+
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Пользователь успешно создан"})
 }

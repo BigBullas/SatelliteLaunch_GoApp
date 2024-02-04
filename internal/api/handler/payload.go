@@ -13,12 +13,16 @@ import (
 )
 
 // GetPayloadList godoc
-// @Summary Get payload list
-// @Description Retrieve a list of payloads based on the provided query.
+// @Summary Get Payload List
+// @Description Retrieves a list of payloads based on the provided filters
 // @Tags Payloads
 // @Accept json
 // @Produce json
-// @Param space_satellite query string false "Query string to filter threats"
+// @Param space_satellite query string false "Space Satellite"
+// @Param load_capacity_start query string false "Load Capacity Start"
+// @Param load_capacity_end query string false "Load Capacity End"
+// @Param flight_date_start query string false "Flight Date Start"
+// @Param flight_date_end query string false "Flight Date End"
 // @Success 200 {object} []models.Payload
 // @Failure 500 {object} error
 // @Router /payloads [get]
@@ -347,48 +351,41 @@ func (h *Handler) DeletePayloadById(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/payloads")
 }
 
+
 // AddPayloadToFlight godoc
-// @Summary Add payload to flight
-// @Description Add a payload to a planned flight.
+// @Summary Add Payload to Flight
+// @Description Adds a specified payload to a planned flight. The user must provide their creator ID and the payload ID in the request body.
 // @Tags Payloads
 // @Accept json
 // @Produce json
-// @Param payload body int true "Payload ID and Creator ID"
-// @Success 200 {string} string "Payload added to flight"
+// @Param payload body int true "Payload ID to be added to the flight"
+// @Success 200 {integer} integer "The ID of the draft flight after adding the payload"
 // @Failure 400 {object} error
-// @Failure 500 {object} error
 // @Router /payloads/rocket_flight [post]
 func (h *Handler) AddPayloadToFlight(c *gin.Context) {
-	var creatorId int
-	var payloadId int
+	payloadId, err := strconv.Atoi(c.Query("payload"))
 
-	type RocketFlightShort struct {
-		PayloadId int
-	}
-
-	jsonStr := RocketFlightShort{}
-
-	err := c.ShouldBindJSON(&jsonStr)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
+	var creatorId int
+
 	creatorId = c.GetInt(userCtx)
-	payloadId = jsonStr.PayloadId
 
 	if payloadId == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Требуется хотя бы одна полезная нагрузка"})
 		return
 	}
 
-	err = h.repo.AddPayloadToFlight(creatorId, payloadId)
+	draftId, err := h.repo.AddPayloadToFlight(creatorId, payloadId)
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Полезная нагрузка добавлена в планируемый полёт"})
+	c.JSON(http.StatusOK, draftId)
 	return
 }
 

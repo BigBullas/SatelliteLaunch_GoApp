@@ -1,8 +1,8 @@
 db:
-  connection_string: "host=192.168.0.107 port=5433 user=admin dbname=rip_lab options='-c search_path=public' password=qwerty321 sslmode=disable"
+  connection_string: "host=localhost port=5433 user=admin dbname=rip_lab options='-c search_path=public' password=qwerty321 sslmode=disable"
 
 minio:
-  host: "192.168.0.107:9000"
+  host: "localhost:9000"
   location: "us-east-1"
   accessKeyId: "minio"
   secretAccessKey: "minio124"

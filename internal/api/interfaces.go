@@ -14,7 +14,7 @@ type Repo interface {
 	DeletePayloadById(int) error
 	GetPayloadImageUrl(int) string
 
-	AddPayloadToFlight(int, int) error
+	AddPayloadToFlight(int, int) (int, error)
 	DeletePayloadFromFlight(int, int) error
 	ChangeCountFlightsPayload(int, int, int) error
 
@@ -27,7 +27,8 @@ type Repo interface {
 	DeleteRocketFlight(int) error
 	FinishCalculating(models.FlightAsync) error
 
-	SignUp(ctx context.Context, newUser models.User) error
-	GetByCredentials(ctx context.Context, user models.User) (models.User, error)
-	GetUserInfo(ctx context.Context, user models.User) (models.User, error)
+	SignUp(ctx context.Context, newUser models.User) (int, bool, error)
+	GetByCredentials(context.Context, models.User) (models.User, error)
+	GetUserInfo(context.Context, models.User) (models.User, error)
+	ChangeProfile(context.Context, models.User) error
 }

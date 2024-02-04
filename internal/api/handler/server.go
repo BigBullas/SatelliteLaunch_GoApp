@@ -116,7 +116,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r.DELETE("/payloads/:id", h.WithAuthCheck([]models.Role{models.Admin}), h.DeletePayloadById)
 
 	// удалить после перехода на фронт
-	r.POST("/payload/:id", h.WithAuthCheck([]models.Role{models.Admin}), h.DeletePayloadById)
+	// r.POST("/payload/:id", h.WithAuthCheck([]models.Role{models.Admin}), h.DeletePayloadById)
 
 	// полёты ракет-носителей
 	r.GET("/rocket_flights", h.WithAuthCheck([]models.Role{models.Admin, models.Client}), h.GetRocketFlightList)
@@ -139,6 +139,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r.POST("/sign_in", h.SignIn)
 	r.POST("/sign_up", h.SignUp)
 	r.POST("/logout", h.Logout)
+	r.PUT("/profile", h.ChangeProfile)
 
 	// для фронта на будущее
 	r.GET("/check-auth", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.CheckAuth)
