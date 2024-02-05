@@ -361,9 +361,13 @@ func (h *Handler) DeletePayloadById(c *gin.Context) {
 // @Param payload body int true "Payload ID to be added to the flight"
 // @Success 200 {integer} integer "The ID of the draft flight after adding the payload"
 // @Failure 400 {object} error
-// @Router /payloads/rocket_flight [post]
+// @Router /payloads/rocket_flight/{payload} [post]
 func (h *Handler) AddPayloadToFlight(c *gin.Context) {
-	payloadId, err := strconv.Atoi(c.Query("payload"))
+	// payloadId, err := strconv.Atoi(c.Query("payload"))
+	strPayloadId := c.Param("payload")
+	payloadId, err := strconv.Atoi(strPayloadId)
+
+	h.logger.Println("payload: ", payloadId)
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})

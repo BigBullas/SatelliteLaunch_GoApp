@@ -18,7 +18,7 @@ type Repo interface {
 	DeletePayloadFromFlight(int, int) error
 	ChangeCountFlightsPayload(int, int, int) error
 
-	GetRocketFlightList(time.Time, time.Time, string) ([]models.RocketFlight, error)
+	GetRocketFlightList(time.Time, time.Time, string, int, bool) ([]models.RocketFlight, error)
 	GetRocketFlightDraft(int) (int, error)
 	GetRocketFlightById(int) (models.RocketFlight, []models.Payload, error)
 	ChangeRocketFlight(models.RocketFlight) error

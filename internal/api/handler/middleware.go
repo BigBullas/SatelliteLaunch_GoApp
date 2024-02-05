@@ -14,6 +14,7 @@ import (
 const (
 	jwtPrefix = "Bearer "
 	userCtx   = "UserId"
+	adminCtx  = "IsAdmin"
 )
 
 func (h *Handler) WithAuthCheck(assignedRoles []models.Role) func(ctx *gin.Context) {
@@ -57,6 +58,7 @@ func (h *Handler) WithAuthCheck(assignedRoles []models.Role) func(ctx *gin.Conte
 		}
 
 		gCtx.Set(userCtx, userId)
+		gCtx.Set(adminCtx, isAdmin)
 		gCtx.Next()
 	}
 }

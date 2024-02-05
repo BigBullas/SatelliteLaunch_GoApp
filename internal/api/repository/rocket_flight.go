@@ -45,7 +45,9 @@ func (r *Repository) GetLoginsForFlights(rocketFlights []models.RocketFlight) ([
 	return rocketFlights, nil
 }
 
-func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd time.Time, status string) ([]models.RocketFlight, error) {
+func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd time.Time,
+	status string, userId int, isAdmin bool) ([]models.RocketFlight, error) {
+
 	var rocketFlights []models.RocketFlight
 	var err error
 
@@ -53,9 +55,16 @@ func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd ti
 		if formDateStart.IsZero() {
 			if formDateEnd.IsZero() {
 				// фильтрация только по статусу
-				res := r.db.Where("status = ?", status).Find(&rocketFlights)
-				if res.Error != nil {
-					return rocketFlights, res.Error
+				if isAdmin {
+					res := r.db.Where("status = ?", status).Find(&rocketFlights)
+					if res.Error != nil {
+						return rocketFlights, res.Error
+					}
+				} else {
+					res := r.db.Where("status = ?", status).Where("creator_id = ?", userId).Find(&rocketFlights)
+					if res.Error != nil {
+						return rocketFlights, res.Error
+					}
 				}
 
 				rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
@@ -67,9 +76,16 @@ func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd ti
 			}
 
 			// фильтрация по статусу и formDateEnd
-			res := r.db.Where("status = ?", status).Where("formed_at < ?", formDateEnd).Find(&rocketFlights)
-			if res.Error != nil {
-				return rocketFlights, res.Error
+			if isAdmin {
+				res := r.db.Where("status = ?", status).Where("formed_at < ?", formDateEnd).Find(&rocketFlights)
+				if res.Error != nil {
+					return rocketFlights, res.Error
+				}
+			} else {
+				res := r.db.Where("status = ?", status).Where("formed_at < ?", formDateEnd).Where("creator_id = ?", userId).Find(&rocketFlights)
+				if res.Error != nil {
+					return rocketFlights, res.Error
+				}
 			}
 
 			rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
@@ -82,10 +98,19 @@ func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd ti
 
 		// фильтрация по статусу и formDateStart
 		if formDateEnd.IsZero() {
-			res := r.db.Where("status = ?", status).Where("formed_at > ?", formDateStart).
-				Find(&rocketFlights)
-			if res.Error != nil {
-				return rocketFlights, res.Error
+			// фильтрация по статусу и formDateEnd
+			if isAdmin {
+				res := r.db.Where("status = ?", status).Where("formed_at > ?", formDateStart).
+					Find(&rocketFlights)
+				if res.Error != nil {
+					return rocketFlights, res.Error
+				}
+			} else {
+				res := r.db.Where("status = ?", status).Where("formed_at > ?", formDateStart).Where("creator_id = ?", userId).
+					Find(&rocketFlights)
+				if res.Error != nil {
+					return rocketFlights, res.Error
+				}
 			}
 
 			rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
@@ -97,9 +122,17 @@ func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd ti
 		}
 
 		// фильтрация по статусу, formDateStart и formDateEnd
-		res := r.db.Where("status = ?", status).Where("formed_at BETWEEN ? AND ?", formDateStart, formDateEnd).Find(&rocketFlights)
-		if res.Error != nil {
-			return rocketFlights, res.Error
+		if isAdmin {
+			res := r.db.Where("status = ?", status).Where("formed_at BETWEEN ? AND ?", formDateStart, formDateEnd).Find(&rocketFlights)
+			if res.Error != nil {
+				return rocketFlights, res.Error
+			}
+		} else {
+			res := r.db.Where("status = ?", status).Where("formed_at BETWEEN ? AND ?", formDateStart, formDateEnd).
+				Where("creator_id = ?", userId).Find(&rocketFlights)
+			if res.Error != nil {
+				return rocketFlights, res.Error
+			}
 		}
 
 		rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
@@ -113,9 +146,16 @@ func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd ti
 	if formDateStart.IsZero() {
 		if formDateEnd.IsZero() {
 			// без фильтрации
-			res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Find(&rocketFlights)
-			if res.Error != nil {
-				return rocketFlights, res.Error
+			if isAdmin {
+				res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Find(&rocketFlights)
+				if res.Error != nil {
+					return rocketFlights, res.Error
+				}
+			} else {
+				res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Where("creator_id = ?", userId).Find(&rocketFlights)
+				if res.Error != nil {
+					return rocketFlights, res.Error
+				}
 			}
 
 			rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
@@ -127,9 +167,17 @@ func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd ti
 		}
 
 		// фильтрация по formDateEnd
-		res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Where("formed_at < ?", formDateEnd).Find(&rocketFlights)
-		if res.Error != nil {
-			return rocketFlights, res.Error
+		if isAdmin {
+			res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Where("formed_at < ?", formDateEnd).Find(&rocketFlights)
+			if res.Error != nil {
+				return rocketFlights, res.Error
+			}
+		} else {
+			res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Where("formed_at < ?", formDateEnd).
+				Where("creator_id = ?", userId).Find(&rocketFlights)
+			if res.Error != nil {
+				return rocketFlights, res.Error
+			}
 		}
 
 		rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
@@ -142,9 +190,17 @@ func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd ti
 
 	if formDateEnd.IsZero() {
 		// фильтрация по formDateStart
-		res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Where("formed_at > ?", formDateStart).Find(&rocketFlights)
-		if res.Error != nil {
-			return rocketFlights, res.Error
+		if isAdmin {
+			res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Where("formed_at > ?", formDateStart).Find(&rocketFlights)
+			if res.Error != nil {
+				return rocketFlights, res.Error
+			}
+		} else {
+			res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Where("formed_at > ?", formDateStart).
+				Where("creator_id = ?", userId).Find(&rocketFlights)
+			if res.Error != nil {
+				return rocketFlights, res.Error
+			}
 		}
 
 		rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
@@ -156,10 +212,18 @@ func (r *Repository) GetRocketFlightList(formDateStart time.Time, formDateEnd ti
 	}
 
 	//фильтрация по formDateStart и formDateEnd
-	res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).
-		Where("formed_at BETWEEN ? AND ?", formDateStart, formDateEnd).Find(&rocketFlights)
-	if res.Error != nil {
-		return rocketFlights, res.Error
+	if isAdmin {
+		res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).
+			Where("formed_at BETWEEN ? AND ?", formDateStart, formDateEnd).Find(&rocketFlights)
+		if res.Error != nil {
+			return rocketFlights, res.Error
+		}
+	} else {
+		res := r.db.Where("status IN (?)", []string{"formed", "completed", "rejected"}).Where("creator_id = ?", userId).
+			Where("formed_at BETWEEN ? AND ?", formDateStart, formDateEnd).Find(&rocketFlights)
+		if res.Error != nil {
+			return rocketFlights, res.Error
+		}
 	}
 
 	rocketFlights, err = r.GetLoginsForFlights(rocketFlights)
@@ -187,7 +251,7 @@ func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlight, []m
 	var err error
 
 	//информация по данному полёту
-	result := r.db.First(&rocketFlight, "flight_id =?", flightId)
+	result := r.db.First(&rocketFlight, "flight_id =? AND status != 'deleted'", flightId)
 	if result.Error != nil {
 		// log.Println("Ошибка при получении данного полёта")
 		return models.RocketFlight{}, []models.Payload{}, result.Error

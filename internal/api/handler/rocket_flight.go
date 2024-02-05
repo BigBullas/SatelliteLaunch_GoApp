@@ -56,7 +56,10 @@ func (h *Handler) GetRocketFlightList(c *gin.Context) {
 		}
 	}
 
-	rocketFlights, err := h.repo.GetRocketFlightList(formDateStart, formDateEnd, strStatus)
+	userId := c.GetInt(userCtx)
+	isAdmin := c.GetBool(adminCtx)
+
+	rocketFlights, err := h.repo.GetRocketFlightList(formDateStart, formDateEnd, strStatus, userId, isAdmin)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, err)
 		return

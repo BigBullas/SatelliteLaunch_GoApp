@@ -191,12 +191,11 @@ func (h *Handler) ChangeProfile(c *gin.Context) {
 	}
 
 	err = h.repo.ChangeProfile(c.Request.Context(), models.User{
+		UserId:   c.GetInt(userCtx),
 		Login:    changedClient.Login,
 		Password: changedClient.Password,
 		Email:    changedClient.Email,
 	})
-
-	h.logger.Println("Changed user: ", changedClient)
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Нельзя изменить пользователя на такой логин"})
@@ -204,5 +203,5 @@ func (h *Handler) ChangeProfile(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Пользователь успешно создан"})
+	c.JSON(http.StatusCreated, gin.H{"message": "Данные пользователя успешно изменены"})
 }
