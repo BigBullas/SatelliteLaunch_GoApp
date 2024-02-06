@@ -140,8 +140,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r.POST("/sign_up", h.SignUp)
 	r.POST("/logout", h.Logout)
 	r.PUT("/profile", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.ChangeProfile)
-
-	// для фронта на будущее
 	r.GET("/check-auth", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.CheckAuth)
 
 	return r

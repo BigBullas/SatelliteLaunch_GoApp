@@ -36,7 +36,7 @@ func (h *Handler) GetRocketFlightList(c *gin.Context) {
 	var err error
 
 	if strFormDateStart != "" {
-		formDateStart, err = time.Parse("2006-01-02 15:04:05", strFormDateStart)
+		formDateStart, err = time.Parse("2006-01-02", strFormDateStart)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата конца периода формирования полёта"})
 			return
@@ -44,8 +44,9 @@ func (h *Handler) GetRocketFlightList(c *gin.Context) {
 	}
 
 	if strFormDateEnd != "" {
-		formDateEnd, err = time.Parse("2006-01-02 15:04:05", strFormDateEnd)
+		formDateEnd, err = time.Parse("2006-01-02", strFormDateEnd)
 		if err != nil {
+			h.logger.Println("err_parsing: ", err)
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата конца периода формирования полёта"})
 			return
 		}

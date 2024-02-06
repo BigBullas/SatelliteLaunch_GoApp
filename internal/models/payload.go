@@ -15,4 +15,5 @@ type Payload struct {
 	DesiredPrice    float64   `json:"desired_price"`
 	FlightDateStart time.Time `json:"flight_date_start"`
 	FlightDateEnd   time.Time `json:"flight_date_end"`
+	CountSatellites int       `json:"count,omitempty"`
 }

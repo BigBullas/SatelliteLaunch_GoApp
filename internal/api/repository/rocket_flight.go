@@ -265,7 +265,7 @@ func (r *Repository) GetRocketFlightById(flightId int) (models.RocketFlight, []m
 	rocketFlight = rocketFlights[0]
 
 	//полезные нагрузки КА, принятые на данный полёт
-	result = r.db.Table("flights_payloads").Select("payloads.*").
+	result = r.db.Table("flights_payloads").Select("payloads.*, flights_payloads.count_satellites").
 		Joins("JOIN payloads ON flights_payloads.payload_id = payloads.payload_id").
 		Where("flights_payloads.flight_id = ?", flightId).Find(&payloads)
 	if result.Error != nil {
