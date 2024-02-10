@@ -172,7 +172,7 @@ func (r *Repository) ChangeCountFlightsPayload(userId int, requestId int, count 
 		return errors.New("Такой полезной нагрузки нет в данном планируемом полёте")
 	}
 
-	flightsPayload.CountSatellites += count
+	flightsPayload.CountSatellites = count
 	if flightsPayload.CountSatellites < 1 {
 		return errors.New("Количество данных полезных нагрузок будет меньше одного после выполнения данной операции")
 	}

@@ -120,15 +120,54 @@ func (h *Handler) GetRocketFlightById(c *gin.Context) {
 // @Failure 500 {object} error
 // @Router /rocket_flights [put]
 func (h *Handler) ChangeRocketFlight(c *gin.Context) {
+
+	/*
+		var newRocketFlight struct {
+			FlightDate string `json:"flight_date" binding:"required"`
+			// Другие поля...
+		}
+
+		if err := c.ShouldBindJSON(&newRocketFlight); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Разбор строки в time.Time
+		flightDate, err := time.Parse("2006-01-02T15:04:05Z07:00", newRocketFlight.FlightDate)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
+			return
+		}
+
+		// Теперь flightDate содержит корректное значение time.Time
+		fmt.Println(flightDate)
+	*/
+
 	newRocketFlight := models.RocketFlight{}
 
 	err := c.BindJSON(&newRocketFlight)
+
+		h.logger.Println(newRocketFlight)
+
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	newRocketFlight.CreatorId = c.GetInt(userCtx)
+
+	h.logger.Println("RocketFlightData", newRocketFlight.FlightDate)
+
+	if !(newRocketFlight.FlightDate == time.Time{}) {
+		_, err = time.Parse("2006-01-02  15:04:05 -0700 MST", newRocketFlight.FlightDate.String())
+
+		if err != nil {
+			h.logger.Println("error: ", err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+			return
+		}
+
+	}
 
 	err = h.repo.ChangeRocketFlight(newRocketFlight)
 	if err != nil {
@@ -152,7 +191,7 @@ func (h *Handler) ChangeRocketFlight(c *gin.Context) {
 // @Router /rocket_flights/form [post]
 func (h *Handler) FormRocketFlight(c *gin.Context) {
 	var newFlightStatus models.RocketFlight
-	var flightId int
+	// var flightId int
 	err := c.BindJSON(&newFlightStatus)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
@@ -166,16 +205,16 @@ func (h *Handler) FormRocketFlight(c *gin.Context) {
 
 	newFlightStatus.CreatorId = c.GetInt(userCtx)
 
-	flightId, err = h.repo.FormRocketFlight(newFlightStatus)
+	_, err = h.repo.FormRocketFlight(newFlightStatus)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = h.StartScanning(flightId)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"mesage": err})
-	}
+	// err = h.StartScanning(flightId)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"mesage": err})
+	// }
 
 	c.JSON(http.StatusOK, gin.H{"message": "Статус успешно изменен на 'formed'"})
 }
