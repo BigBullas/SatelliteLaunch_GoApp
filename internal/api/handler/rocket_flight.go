@@ -120,29 +120,6 @@ func (h *Handler) GetRocketFlightById(c *gin.Context) {
 // @Failure 500 {object} error
 // @Router /rocket_flights [put]
 func (h *Handler) ChangeRocketFlight(c *gin.Context) {
-
-	/*
-		var newRocketFlight struct {
-			FlightDate string `json:"flight_date" binding:"required"`
-			// Другие поля...
-		}
-
-		if err := c.ShouldBindJSON(&newRocketFlight); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		// Разбор строки в time.Time
-		flightDate, err := time.Parse("2006-01-02T15:04:05Z07:00", newRocketFlight.FlightDate)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid date format"})
-			return
-		}
-
-		// Теперь flightDate содержит корректное значение time.Time
-		fmt.Println(flightDate)
-	*/
-
 	newRocketFlight := models.RocketFlight{}
 
 	err := c.BindJSON(&newRocketFlight)
