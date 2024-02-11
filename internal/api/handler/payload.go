@@ -45,20 +45,6 @@ func (h *Handler) GetPayloadList(c *gin.Context) {
 		return
 	}
 
-	// if flightId == 0 {
-	// 	c.HTML(http.StatusOK, "index.gohtml", gin.H{
-	// 		"cards":           data,
-	// 		"space_satellite": strSearch,
-	// 	})
-	// 	return
-	// }
-
-	// c.HTML(http.StatusOK, "index.gohtml", gin.H{
-	// 	"cards":               data,
-	// 	"space_satellite":     strSearch,
-	// 	"draftRocketFlightId": flightId,
-	// })
-
 	if flightId == 0 {
 		c.JSON(http.StatusOK, gin.H{"payloads": data, "draftRocketFlightId": nil})
 		return
@@ -348,9 +334,8 @@ func (h *Handler) DeletePayloadById(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	c.Redirect(http.StatusFound, "/payloads")
+	c.JSON(http.StatusOK, "Полезная нагрузка успешно удалена")
 }
-
 
 // AddPayloadToFlight godoc
 // @Summary Add Payload to Flight

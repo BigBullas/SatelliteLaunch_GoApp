@@ -124,7 +124,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r.PUT("/rocket_flights", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.ChangeRocketFlight)
 	r.PUT("/rocket_flights/form", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.FormRocketFlight)
 	r.PUT("/rocket_flights/:id/response", h.WithAuthCheck([]models.Role{models.Admin}), h.ResponceRocketFlight)
-	r.DELETE("/rocket_flights", h.WithAuthCheck([]models.Role{models.Client}), h.DeleteRocketFlight)
+	r.DELETE("/rocket_flights", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.DeleteRocketFlight)
 	// async service
 	r.PUT("rocket_flights/finish_calculating", h.FinishCalculating)
 
@@ -132,8 +132,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	r.POST("/payloads/rocket_flight/:payload", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.AddPayloadToFlight)
 
 	// m-m
-	r.DELETE("/flights_payloads/payload/:id", h.WithAuthCheck([]models.Role{models.Client}), h.DeletePayloadFromFlight)
-	r.PUT("/flights_payloads/payload/:id/count/:count", h.WithAuthCheck([]models.Role{models.Client}), h.ChangeCountFlightsPayload)
+	r.DELETE("/flights_payloads/payload/:id", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.DeletePayloadFromFlight)
+	r.PUT("/flights_payloads/payload/:id/count/:count", h.WithAuthCheck([]models.Role{models.Client, models.Admin}), h.ChangeCountFlightsPayload)
 
 	//user
 	r.POST("/sign_in", h.SignIn)

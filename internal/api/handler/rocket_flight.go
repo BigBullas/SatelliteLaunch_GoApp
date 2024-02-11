@@ -168,7 +168,7 @@ func (h *Handler) ChangeRocketFlight(c *gin.Context) {
 // @Router /rocket_flights/form [post]
 func (h *Handler) FormRocketFlight(c *gin.Context) {
 	var newFlightStatus models.RocketFlight
-	// var flightId int
+	var flightId int
 	err := c.BindJSON(&newFlightStatus)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
@@ -182,16 +182,16 @@ func (h *Handler) FormRocketFlight(c *gin.Context) {
 
 	newFlightStatus.CreatorId = c.GetInt(userCtx)
 
-	_, err = h.repo.FormRocketFlight(newFlightStatus)
+	flightId, err = h.repo.FormRocketFlight(newFlightStatus)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	// err = h.StartScanning(flightId)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"mesage": err})
-	// }
+	err = h.StartScanning(flightId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"mesage": err})
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Статус успешно изменен на 'formed'"})
 }
