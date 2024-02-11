@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -99,6 +100,7 @@ func (h *Handler) GetCardPayloadById(c *gin.Context) {
 // @Router /payloads [post]
 func (h *Handler) CreateNewPayload(c *gin.Context) {
 	var newPayload models.Payload
+	var err error
 
 	newPayload.Title = c.Request.FormValue("title")
 	if newPayload.Title == "" {
@@ -108,8 +110,8 @@ func (h *Handler) CreateNewPayload(c *gin.Context) {
 
 	// log.Println("title", newPayload.Title)
 
-	file, header, err := c.Request.FormFile("image")
-	if err != nil {
+	file, header, fileError := c.Request.FormFile("image")
+	if fileError != nil && fileError != http.ErrMissingFile {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 		return
 	}
@@ -137,7 +139,7 @@ func (h *Handler) CreateNewPayload(c *gin.Context) {
 	// log.Println("load_capacity", newPayload.LoadCapacity)
 
 	newPayload.Description = c.Request.FormValue("description")
-	newPayload.DetailedDesc = c.Request.FormValue("detailed_description")
+	newPayload.DetailedDesc = c.Request.FormValue("detailed_desc")
 
 	// log.Println("descriptions: ", newPayload.Description, newPayload.DetailedDesc)
 
@@ -160,7 +162,7 @@ func (h *Handler) CreateNewPayload(c *gin.Context) {
 
 	// log.Println("start date: ", startDate)
 
-	newPayload.FlightDateStart, err = time.Parse("2006-01-02 15:04:05", startDate)
+	newPayload.FlightDateStart, err = time.Parse(time.RFC3339, startDate+":00Z")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата начала желаемого периода полёта"})
 		return
@@ -171,7 +173,7 @@ func (h *Handler) CreateNewPayload(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Дата конца желаемого периода полёта не может быть пустой"})
 		return
 	}
-	newPayload.FlightDateEnd, err = time.Parse("2006-01-02 15:04:05", endDate)
+	newPayload.FlightDateEnd, err = time.Parse(time.RFC3339, endDate+":00Z")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата конца желаемого периода полёта"})
 		return
@@ -179,10 +181,14 @@ func (h *Handler) CreateNewPayload(c *gin.Context) {
 
 	newPayload.IsAvailable = true
 
-	newPayload.ImgURL, err = h.minio.SaveImage(c.Request.Context(), file, header)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Ошибка при сохранении изображения"})
-		return
+	if fileError != http.ErrMissingFile {
+		newPayload.ImgURL, err = h.minio.SaveImage(c.Request.Context(), file, header)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Ошибка при сохранении изображения"})
+			return
+		}
+	} else {
+		newPayload.ImgURL = ""
 	}
 
 	err = h.repo.CreateNewPayload(newPayload)
@@ -216,7 +222,7 @@ func (h *Handler) CreateNewPayload(c *gin.Context) {
 // @Router /payloads/{id} [put]
 func (h *Handler) ChangePayload(c *gin.Context) {
 	file, header, err := c.Request.FormFile("image")
-	if err != nil {
+	if err != nil && err != http.ErrMissingFile {
 		h.logger.Errorf("Handler/payload/ChangePayload/Ошибка при чтении файла: %s", err)
 	}
 	var changedPayload models.Payload
@@ -260,9 +266,9 @@ func (h *Handler) ChangePayload(c *gin.Context) {
 	// log.Println("load_capacity", newPayload.LoadCapacity)
 
 	changedPayload.Description = c.Request.FormValue("description")
-	changedPayload.DetailedDesc = c.Request.FormValue("detailed_description")
+	changedPayload.DetailedDesc = c.Request.FormValue("detailed_desc")
 
-	// log.Println("descriptions: ", newPayload.Description, newPayload.DetailedDesc)
+	// log.Println("descriptions: ", changedPayload.Description, changedPayload.DetailedDesc)
 
 	desiredPrice := c.Request.FormValue("desired_price")
 	if desiredPrice != "" {
@@ -277,7 +283,7 @@ func (h *Handler) ChangePayload(c *gin.Context) {
 
 	startDate := c.Request.FormValue("flight_date_start")
 	if startDate != "" {
-		changedPayload.FlightDateStart, err = time.Parse("2006-01-02 15:04:05", startDate)
+		changedPayload.FlightDateStart, err = time.Parse(time.RFC3339, strings.ReplaceAll(startDate, " ", "T")+":00Z")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата начала желаемого периода полёта"})
 			return
@@ -288,7 +294,8 @@ func (h *Handler) ChangePayload(c *gin.Context) {
 
 	endDate := c.Request.FormValue("flight_date_end")
 	if endDate != "" {
-		changedPayload.FlightDateEnd, err = time.Parse("2006-01-02 15:04:05", endDate)
+		changedPayload.FlightDateEnd, err = time.Parse(time.RFC3339, strings.ReplaceAll(endDate, " ", "T")+":00Z")
+		log.Println("start date: ", endDate, changedPayload.FlightDateEnd)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Неверно указана дата конца желаемого периода полёта"})
 			return
