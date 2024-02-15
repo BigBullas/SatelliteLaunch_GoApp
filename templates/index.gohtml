@@ -32,18 +32,26 @@
     <div class="header-subtitle">
       Один из самых масштабных проектов России ХХI века
     </div>
-    <!-- Внутри картинки надпись: заявки на выведение КА на орбиту -->
   </div>
   <div class="search_container">
     <form action="/home">
       <input type="text" name="spacecraft" placeholder="Введите название" value="{{ .spacecraft }}">
       <input type="submit" value="Найти">
     </form>
+    {{if .count }}
+      <div class="btn-draft">
+          В полёте: {{ .count }} КА
+      </div>
+    {{ else }}
+      <div class="btn-draft__disabled">
+          В полёте: {{ .count }} КА
+      </div>
+    {{ end }}
   </div>
   <div class="card_container">
     {{if .cards }}
       {{ range .cards }}
-        <div id ="{{ .Id }}" class="card">
+        <div id ="{{ .PayloadId }}" class="card">
           <div class="card-img_container">
             <div class="card-img" style="background-image: url({{ .ImgURL }});"></div>
           </div>
@@ -66,15 +74,20 @@
                   Цена услуги: <span>{{ .DesiredPrice }} млн рублей</span>
                 </div>
               </div>
-            </div>                <input type="hidden" name="cardId" value="{{ .Id }}">
+            </div>
             <div class="card-btn_container">
-              <form action="/card">
-                <input type="hidden" name="cardId" value="{{ .Id }}">
-                <input type="submit" value="Подробнее">
+              <form action="/payload">
+                <input type="hidden" name="cardId" value="{{ .PayloadId }}">
+                <button class="card-button">Подробнее о КА</button>
               </form>
-              <form action="http://localhost:8080/card/{{ .Id }}" method="post">
-                <button class="card-button">Удалить услугу</button>
-            </form>
+              <form action="http://localhost:8080/payload/{{ .PayloadId }}" method="post">
+                <input type="hidden" name="cardId" value="{{ .PayloadId }}">
+                <button class="card-button">Удалить КА</button>
+              </form>
+              <form action="http://localhost:8080/add_to_draft/{{ .PayloadId }}" method="post">
+                <input type="hidden" name="cardId" value="{{ .PayloadId }}">
+                <button class="card-button">Добавить в полёт</button>
+              </form>
             </div>
           </div>
         </div>

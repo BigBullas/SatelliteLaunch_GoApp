@@ -27,7 +27,6 @@
 </div>
 <div class="under_header"></div>
 <div class="card_container__simple">
-<div id ="{{ .card.Id }}" class="card__detailed">
     <div class="card-img_container__detailed">
         <div class="card-img" style="background-image: url({{ .card.ImgURL }});"></div>
     </div>
@@ -35,10 +34,6 @@
         <div class="card-btn_container">
             <form action="/home">
                 <input type="submit" value="Назад">
-            </form>
-            <form action="/card" method="post">
-                <input type="hidden" name="cardId" value="{{ .card.Id }}">
-                <input type="submit" value="Удалить">
             </form>
         </div>
         <div class="card-text_container">

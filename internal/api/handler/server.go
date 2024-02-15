@@ -26,10 +26,10 @@ func (h *Handler) StartServer() {
 
 	r.LoadHTMLGlob("templates/*")
 
-	r.GET("/home", h.GetRequestForDeliveryList)
-	r.GET("/card/", h.GetCardRequestForDeliveryById)
-	r.POST("/card/:cardId", h.DeleteRequestForDeliveryById)
-	r.POST("/add_to_draft", h.AddPayloadToFlight)
+	r.GET("/home", h.GetPayloadList)
+	r.GET("/payload/", h.GetCardPayloadById)
+	r.POST("/payload/:cardId", h.DeletePayloadById)
+	r.POST("/add_to_draft/:cardId", h.AddPayloadToFlight)
 
 	r.Static("/image", "./resources")
 	r.Static("/style", "./style")
@@ -40,12 +40,11 @@ func (h *Handler) StartServer() {
 	}
 }
 
-func (h *Handler) GetRequestForDeliveryList(c *gin.Context) {
+func (h *Handler) GetPayloadList(c *gin.Context) {
 	queryString := c.Request.URL.Query()       // queryString - это тип url.Values, который содержит все query параметры
 	strSearch := queryString.Get("spacecraft") // Получение значения конкретного параметра по его имени
 
 	count, data, err := h.repo.GetRequestForDeliveryList(strSearch)
-	log.Println("data", data)
 	if err != nil {
 		log.Println(err)
 	}
@@ -58,42 +57,23 @@ func (h *Handler) GetRequestForDeliveryList(c *gin.Context) {
 }
 
 func (h *Handler) AddPayloadToFlight(c *gin.Context) {
-	var creatorId int
-	var payloadId int
-
-	type RocketFlightShort struct {
-		CreatorId int
-		PayloadId int
-	}
-
-	jsonStr := RocketFlightShort{}
-
-	err := c.ShouldBindJSON(&jsonStr)
+	strPayloadId := c.Param("cardId")
+	payloadId, err := strconv.Atoi(strPayloadId)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
+		log.Println("Ошибка при преобразовании строки в число:", err)
 	}
 
-	creatorId = 1
-	payloadId = jsonStr.PayloadId
-
-	if payloadId == 0 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Требуется хотя бы одна полезная нагрузка"})
-		return
-	}
-
-	err = h.repo.AddFlightRequestToFlight(creatorId, payloadId)
+	err = h.repo.AddFlightRequestToFlight(payloadId)
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
-
-	h.GetRequestForDeliveryList(c)
+	c.Redirect(http.StatusFound, "/home")
 }
 
-func (h *Handler) GetCardRequestForDeliveryById(c *gin.Context) {
+func (h *Handler) GetCardPayloadById(c *gin.Context) {
 	queryString := c.Request.URL.Query() // queryString - это тип url.Values, который содержит все query параметры
 
 	strCardId := queryString.Get("cardId") // Получение значения конкретного параметра по его имени
@@ -113,8 +93,7 @@ func (h *Handler) GetCardRequestForDeliveryById(c *gin.Context) {
 	})
 }
 
-func (h *Handler) DeleteRequestForDeliveryById(c *gin.Context) {
-
+func (h *Handler) DeletePayloadById(c *gin.Context) {
 	strCardId := c.Param("cardId")
 	cardId, err := strconv.Atoi(strCardId)
 	if err != nil {

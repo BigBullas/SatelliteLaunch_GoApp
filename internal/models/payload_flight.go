@@ -1,6 +1,6 @@
 package models
 
-type FlightsFlightRequests struct {
+type FlightsPayloads struct {
 	FlightId        int
 	PayloadId       int
 	CountSatellites int

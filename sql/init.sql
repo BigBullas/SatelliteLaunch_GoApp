@@ -63,7 +63,12 @@ alter table payloads owner to admin;
 alter table flights_payloads owner to admin;
 
 
-INSERT INTO 
+INSERT INTO "users" (user_id, login, email, password, is_admin) VALUES (1, 'admin0001', 'admin0001@gmail.com', 'admin0001', true);
+INSERT INTO "users" (user_id, login, email, password, is_admin) VALUES (2, 'user0001', 'user0001@gmail.com', 'user0001', false);
+
+INSERT INTO rocket_flights (flight_id, creator_id, moderator_id, status, created_at, flight_date, load_capacity,
+    price, title, place_number) VALUES (1, 2, 1, 'draft', TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'), 
+	TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'), 123, 123123123, 'Черновой полёт', 1);
 
 INSERT INTO payloads(payload_id, is_available, img_url, title, load_capacity,
  description, detailed_desc, desired_price, flight_date_start, flight_date_end)

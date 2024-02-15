@@ -99,6 +99,17 @@ header {
 
 .search_container {
     margin-top: 20px;
+    padding: 0 1.5em;
+    
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+form {
+  margin: 0;
+  padding: 0;
 }
 
 .card_container {
@@ -151,4 +162,29 @@ header {
 
 .card-btn_container {
     display: flex;
+}
+
+.btn-draft {
+    border: 1px solid #9048F0;
+    border-radius: 5px;
+
+    padding: 7px;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    text-align: center;
+    cursor: pointer;
+}
+
+.btn-draft__disabled {
+    border: 1px solid white;
+    border-radius: 5px;
+
+    padding: 7px;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    text-align: center;
+    cursor: default;
+    color: #6c757d;
 }

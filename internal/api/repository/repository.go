@@ -1,8 +1,6 @@
 package repository
 
 import (
-	// "log"
-
 	"errors"
 
 	"gorm.io/driver/postgres"
@@ -24,7 +22,7 @@ func NewRepo(dsn string) (*Repository, error) {
 	}
 
 	// Migrate the schema
-	err = db.AutoMigrate(&models.FlightRequest{})
+	err = db.AutoMigrate(&models.Payload{})
 	if err != nil {
 		panic("Миграция БД не удалась")
 	}
@@ -34,46 +32,22 @@ func NewRepo(dsn string) (*Repository, error) {
 	}, nil
 }
 
-func (r *Repository) GetRequestForDeliveryList(substring string) (int64, []models.FlightRequest, error) {
-	var request_for_delivery []models.FlightRequest
-
+func (r *Repository) GetRequestForDeliveryList(substring string) (int64, []models.Payload, error) {
+	var request_for_delivery []models.Payload
 	var count int64
 
-	err := r.db.Table("flights_flight_requests").Where("flight_id = ?", 0).Count(&count).Error
-
+	err := r.db.Table("flights_payloads").Where("flight_id = ?", draftId).Count(&count).Error
 	if err != nil {
 		return 0, request_for_delivery, err
 	}
 
 	r.db.Where("title ILIKE ?", "%"+substring+"%").Find(&request_for_delivery, "is_available = ?", true)
-
-	return 0, request_for_delivery, nil
-
+	return count, request_for_delivery, nil
 }
-func (r *Repository) AddFlightRequestToFlight(creatorId int, requestId int) error {
-	// var rocketFlight models.RocketFlight
 
-	// r.db.Where("creator_id = ?", creatorId).Where("status = ?", "draft").First(&rocketFlight)
-
-	// log.Println(rocketFlight)
-
-	// if rocketFlight.FlightId == 0 {
-
-	// 	newRocketFlights := models.RocketFlight{
-	// 		CreatorId:   creatorId,
-	// 		ModeratorId: 2,
-	// 		Status:      "draft",
-	// 		CreatedAt:   time.Now(),
-	// 	}
-	// 	res := r.db.Create(&newRocketFlights)
-	// 	if res.Error != nil {
-	// 		return res.Error
-	// 	}
-	// 	rocketFlight = newRocketFlights
-	// }
-	payloadFlight := models.FlightsFlightRequests{
-		FlightId: draftId,
-
+func (r *Repository) AddFlightRequestToFlight(requestId int) error {
+	payloadFlight := models.FlightsPayloads{
+		FlightId:        draftId,
 		PayloadId:       requestId,
 		CountSatellites: 1,
 	}
@@ -86,15 +60,15 @@ func (r *Repository) AddFlightRequestToFlight(creatorId int, requestId int) erro
 	return res.Error
 }
 
-func (r *Repository) GetCardRequestForDeliveryByID(cardId int) (models.FlightRequest, error) {
-	var card models.FlightRequest
+func (r *Repository) GetCardRequestForDeliveryByID(payloadId int) (models.Payload, error) {
+	var card models.Payload
 
-	r.db.Where("request_id = ?", cardId).Find(&card, "is_available = ?", true)
+	r.db.Where("payload_id = ?", payloadId).Find(&card, "is_available = ?", true)
 	return card, nil
 
 }
 func (r *Repository) DeleteRequestForDeliveryById(cardId int) error {
-	err := r.db.Exec("UPDATE flight_requests SET is_available=false WHERE request_id = ?", cardId).Error
+	err := r.db.Exec("UPDATE payloads SET is_available=false WHERE payload_id = ?", cardId).Error
 
 	if err != nil {
 		return err

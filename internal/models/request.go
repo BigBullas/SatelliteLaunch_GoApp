@@ -2,26 +2,15 @@ package models
 
 import "time"
 
-type FlightRequest struct {
-	Id              int `gorm:"primarykey"`
-	ImgURL          string
-	Title           string
-	LoadCapacity    float64
-	Description     string
-	DetailedDesc    string
-	DesiredPrice    float64
-	FlightDateStart time.Time
-	FlightDateEnd   time.Time
+type Payload struct {
+	PayloadId       int       `gorm:"primarykey" json:"payload_id"`
+	IsAvailable     bool      `json:"is_available"`
+	ImgURL          string    `json:"img_url"`
+	Title           string    `json:"title"`
+	LoadCapacity    float64   `json:"load_capacity"`
+	Description     string    `json:"description"`
+	DetailedDesc    string    `json:"detailed_desc"`
+	DesiredPrice    float64   `json:"desired_price"`
+	FlightDateStart time.Time `json:"flight_date_start"`
+	FlightDateEnd   time.Time `json:"flight_date_end"`
 }
-
-// request_id          integer not null
-// constraint request_pk primary key,
-// is_available        boolean,
-// img_url             TEXT,
-// title               varchar(100),
-// load_capacity       float,
-// description         TEXT,
-// detailed_desc       TEXT,
-// desired_price       float,
-// flight_date_start   timestamp,
-// flight_date_end     timestamp
