@@ -1,61 +1,71 @@
-create table if not exists "users"
+drop table if exists "users" CASCADE;
+drop table if exists payloads CASCADE;
+drop table if exists rocket_flights CASCADE;
+drop table if exists flights_payloads CASCADE;
+
+create table "users"
 (
-    user_id         integer not null 
+    user_id         serial unique not null 
                     constraint user_pk primary key,
-    login           varchar(30),
-    password        varchar(30),
-    is_admin        boolean
+    login           varchar(40) not null,
+	email			varchar(40),
+    password        varchar(40) not null,
+    is_admin        boolean default false
 );
 
-create table if not exists rocket_flights
+create table rocket_flights
 (
-    flight_id       integer not null 
+    flight_id       serial unique not null 
                     constraint flight_pk primary key,
-    user_id         integer 
-                    constraint flight_creator_user_id_fk references "users",
-    moderator_id    integer 
-                    constraint flight_moderator_user_id_fk references "users", 
-    status          varchar(20),
-    created_at      timestamp,
+    creator_id      integer not null
+                    constraint flight_creator_user_id_fk references "users" (user_id),
+    moderator_id    integer, 
+    status          varchar(20) not null,
+    created_at      timestamp default now() not null,
     formed_at       timestamp,
     confirmed_at    timestamp,
     flight_date     timestamp,
-    payload         integer,
+    load_capacity         integer,
     price           float,
     title           varchar(100),
-    site_number     integer
+    place_number     integer
 );
 
-create table if not exists flight_requests
+create table payloads
 (
-    request_id          	integer not null 
-                        	constraint request_pk primary key,
-    is_available        	boolean,
-    img_url             	TEXT,
-    title               	varchar(100),
-    load_capacity       	float,
+    payload_id          	SERIAL unique not null 
+                        	constraint payload_pk primary key,
+    is_available        	boolean not null default false,
+    img_url             	TEXT not null,
+    title               	varchar(100) not null,
+    load_capacity       	float not null,
     description         	TEXT,
     detailed_desc		    TEXT,
     desired_price       	float,
-    flight_date_start   	timestamp,
-    flight_date_end     	timestamp
+    flight_date_start   	timestamp not null,
+    flight_date_end     	timestamp not null
 );
 
-create table if not exists flights_flight_requests
+create table flights_payloads
 (
     flight_id       integer 
-                    constraint flight_request_flight_flight_id_fk references rocket_flights,
-    request_id      integer 
-                    constraint request_flight_request_request_id_fk references flight_requests,
-                primary key (flight_id, request_id)
+                    constraint payload_flight_flight_id_fk references rocket_flights ON DELETE CASCADE,
+    payload_id      integer
+                    constraint request_payload_request_id_fk references payloads ON DELETE CASCADE,
+                primary key (flight_id, payload_id),
+	count_satellites integer default 1
+
 );
 
 alter table "users" owner to admin;
 alter table rocket_flights owner to admin;
-alter table flight_requests owner to admin;
-alter table flights_flight_requests owner to admin;
+alter table payloads owner to admin;
+alter table flights_payloads owner to admin;
 
-INSERT INTO flight_requests(request_id, is_available, img_url, title, load_capacity,
+
+INSERT INTO 
+
+INSERT INTO payloads(payload_id, is_available, img_url, title, load_capacity,
  description, detailed_desc, desired_price, flight_date_start, flight_date_end)
 VALUES (1, true, 'https://ntv-static.cdnvideo.ru/home/news/2023/20230205/sputn_io.jpg', '«Электро-Л» № 4', 1.8, 'Гидрометеорологическй космический аппарат',
     'Спутники «Электро-Л» создаются в рамках Федеральной космической программы России и входят' ||
@@ -73,7 +83,7 @@ VALUES (1, true, 'https://ntv-static.cdnvideo.ru/home/news/2023/20230205/sputn_i
 		'Также, спутники ретранслируют сигналы от аварийных радиобуев международной спутниковой поисково-спасательной системы' ||
 		' КОСПАС-САРСАТ. Это помогает поисково-спасательным службам эффективнее реагировать на сигналы бедствия для спасения человеческих жизней.', 
     16.5, TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'));
-INSERT INTO flight_requests(request_id, is_available, img_url, title, load_capacity,
+INSERT INTO payloads(payload_id, is_available, img_url, title, load_capacity,
  description, detailed_desc, desired_price, flight_date_start, flight_date_end)
 VALUES (2, true, 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/ISS-59_Progress_MS-11_approaches_the_ISS.jpg/1200px-ISS-59_Progress_MS-11_approaches_the_ISS.jpg',
 	'«Прогресс МС-22»', 2.5, 'Грузовой корабль', 
@@ -81,7 +91,7 @@ VALUES (2, true, 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/ISS-
 		' февраля 2023 года со стартового комплекса «Восток» (Площадка 31) космодрома «Байконур» по программе 83-й миссии снабжения ' ||
 		'Международной космической станции[1]. Это 175-й полёт космического корабля серии «Прогресс».',
 	26.5, 	TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'));
-INSERT INTO flight_requests(request_id, is_available, img_url, title, load_capacity,
+INSERT INTO payloads(payload_id, is_available, img_url, title, load_capacity,
  description, detailed_desc, desired_price, flight_date_start, flight_date_end)
 VALUES (3, true, 'https://news.cgtn.com/news/2023-02-26/Russia-s-replacement-Soyuz-spacecraft-arrives-at-space-station-1hJfEkcHidG/img/b5c3147c02e44da8941bf851fdebfcc7/b5c3147c02e44da8941bf851fdebfcc7-1280.png',
 	'«Союз МС-23»', 7.2, 'Беспилотный корабль',
@@ -98,7 +108,7 @@ VALUES (3, true, 'https://news.cgtn.com/news/2023-02-26/Russia-s-replacement-Soy
 		' и результатов экспериментов, личных вещей космонавтов и др.), а также для удаления со станции отходов в бытовом' ||
 		' отсеке, который сгорает плотных слоях атмосферы при спуске корабля.',
 	35.5, TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'));
-INSERT INTO flight_requests(request_id, is_available, img_url, title, load_capacity,
+INSERT INTO payloads(payload_id, is_available, img_url, title, load_capacity,
  description, detailed_desc, desired_price, flight_date_start, flight_date_end)
 VALUES (4, true, 'https://finobzor.ru/uploads/posts/2016-09/org_vrke626.jpg', '«Луч-5Х»', 37, 'Многофункциональная космическая система ретрансляции',
 	'"Олимп-К", также обозначаемый как "Луч", является российским геостационарным спутником,' ||
@@ -110,7 +120,7 @@ VALUES (4, true, 'https://finobzor.ru/uploads/posts/2016-09/org_vrke626.jpg', '�
 		' сообщает, что спутник должен обеспечивать сигналы навигационной коррекции для системы ГЛОНАСС. Сообщалось также' ||
 		' о бортовом лазерном устройстве связи.',
 	65, TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'));
-INSERT INTO flight_requests(request_id, is_available, img_url, title, load_capacity,
+INSERT INTO payloads(payload_id, is_available, img_url, title, load_capacity,
  description, detailed_desc, desired_price, flight_date_start, flight_date_end)
 VALUES (5, true, 'https://avatars.dzeninfra.ru/get-zen_doc/9428044/pub_641e3138e540d5493c71189b_641e520f617db875869202c0/scale_1200',
 	'«Барс-М №4»', 4, 'Электронно-оптический спутник',
@@ -125,12 +135,12 @@ VALUES (5, true, 'https://avatars.dzeninfra.ru/get-zen_doc/9428044/pub_641e3138e
 		' стереоизображений, данных высотомера и изображений высокого разрешения с наземным разрешением около 1 метра.',
 	17.4, TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'));
 
--- INSERT INTO flight_requests(request_id, is_available, img_url, title, load_capacity,
+-- INSERT INTO payloads(payload_id, is_available, img_url, title, load_capacity,
 --  description, detailed_desc, desired_price, flight_date_start, flight_date_end)
 -- VALUES (1, true, 'https://ntv-static.cdnvideo.ru/home/news/2023/20230205/sputn_io.jpg', '«Электро-Л» № 4', 1.8, 'Гидрометеорологическй космический аппарат',
 --     'Спутники «Электро-Л» создаются в рамках Федеральной космической программы России и входят', 
 --     16.5, TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'));
--- INSERT INTO flight_requests(request_id, is_available, img_url, title, load_capacity,
+-- INSERT INTO payloads(payload_id, is_available, img_url, title, load_capacity,
 --  description, detailed_desc, desired_price, flight_date_start, flight_date_end)
 -- VALUES (2, true, 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/ISS-59_Progress_MS-11_approaches_the_ISS.jpg/1200px-ISS-59_Progress_MS-11_approaches_the_ISS.jpg',
 -- 	'«Прогресс МС-22»', 2.5, 'Грузовой корабль', 
@@ -138,19 +148,19 @@ VALUES (5, true, 'https://avatars.dzeninfra.ru/get-zen_doc/9428044/pub_641e3138e
 -- 		' февраля 2023 года со стартового комплекса «Восток» (Площадка 31) космодрома «Байконур» по программе 83-й миссии снабжения ' ||
 -- 		'Международной космической станции[1]. Это 175-й полёт космического корабля серии «Прогресс».',
 -- 	26.5, 	TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'));
--- INSERT INTO flight_requests(request_id, is_available, img_url, title, load_capacity,
+-- INSERT INTO payloads(payload_id, is_available, img_url, title, load_capacity,
 --  description, detailed_desc, desired_price, flight_date_start, flight_date_end)
 -- VALUES (3, true, 'https://news.cgtn.com/news/2023-02-26/Russia-s-replacement-Soyuz-spacecraft-arrives-at-space-station-1hJfEkcHidG/img/b5c3147c02e44da8941bf851fdebfcc7/b5c3147c02e44da8941bf851fdebfcc7-1280.png',
 -- 	'«Союз МС-23»', 7.2, 'Беспилотный корабль',
 -- 	'"Союз МС" ("МС" - "модернизированные системы") принадлежит к семейству космических',
 -- 	35.5, TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'));
--- INSERT INTO flight_requests(request_id, is_available, img_url, title, load_capacity,
+-- INSERT INTO payloads(payload_id, is_available, img_url, title, load_capacity,
 --  description, detailed_desc, desired_price, flight_date_start, flight_date_end)
 -- VALUES (4, true, 'https://finobzor.ru/uploads/posts/2016-09/org_vrke626.jpg', '«Луч-5Х»', 37, 'Многофункциональная космическая система ретрансляции',
 -- 	'"Олимп-К", также обозначаемый как "Луч", является российским геостационарным спутником,' ||
 -- 		' созданным для Министерства обороны России и российского разведывательного управления ФСБ. Цели миссий не',
 -- 	65, TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2023-02-05 12:12:52', 'YYYY-MM-DD HH24:MI:SS'));
--- INSERT INTO flight_requests(request_id, is_available, img_url, title, load_capacity,
+-- INSERT INTO payloads(payload_id, is_available, img_url, title, load_capacity,
 --  description, detailed_desc, desired_price, flight_date_start, flight_date_end)
 -- VALUES (5, true, 'https://finobzor.ru/uploads/posts/2016-09/org_vrke626.jpg', '«Луч-5Х»', 37, 'Многофункциональная космическая система ретрансляции',
 -- 	'"Олимп-К", также обозначаемый как "Луч", является российским геостационарным спутником,',
