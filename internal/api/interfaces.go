@@ -14,7 +14,7 @@ type Repo interface {
 	DeletePayloadById(int) error
 	GetPayloadImageUrl(int) string
 
-	AddPayloadToFlight(int, int) (int, error)
+	AddPayloadToFlight(int, int) (bool, error)
 	DeletePayloadFromFlight(int, int) error
 	ChangeCountFlightsPayload(int, int, int) error
 

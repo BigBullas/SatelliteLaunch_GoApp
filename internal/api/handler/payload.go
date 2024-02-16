@@ -355,7 +355,6 @@ func (h *Handler) DeletePayloadById(c *gin.Context) {
 // @Failure 400 {object} error
 // @Router /payloads/rocket_flight/{payload} [post]
 func (h *Handler) AddPayloadToFlight(c *gin.Context) {
-	// payloadId, err := strconv.Atoi(c.Query("payload"))
 	strPayloadId := c.Param("payload")
 	payloadId, err := strconv.Atoi(strPayloadId)
 
@@ -366,23 +365,21 @@ func (h *Handler) AddPayloadToFlight(c *gin.Context) {
 		return
 	}
 
-	var creatorId int
-
-	creatorId = c.GetInt(userCtx)
+	creatorId := c.GetInt(userCtx)
 
 	if payloadId == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Требуется хотя бы одна полезная нагрузка"})
 		return
 	}
 
-	draftId, err := h.repo.AddPayloadToFlight(creatorId, payloadId)
+	flag, err := h.repo.AddPayloadToFlight(creatorId, payloadId)
 
-	if err != nil {
+	if err != nil && !flag {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, draftId)
-	return
+
+	c.JSON(http.StatusOK, gin.H{"message": "OK"})
 }
 
 // DeletePayloadFromFlight godoc

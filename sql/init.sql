@@ -50,9 +50,9 @@ create table payloads
 create table flights_payloads
 (
     flight_id       integer 
-                    constraint payload_flight_flight_id_fk references rocket_flights,
+                    constraint payload_flight_flight_id_fk references rocket_flights DELETE CASCADE,
     payload_id      integer
-                    constraint request_payload_request_id_fk references payloads,
+                    constraint request_payload_request_id_fk references payloads DELETE CASCADE,
                 unique (flight_id, payload_id),
 	count_satellites integer default 1
 

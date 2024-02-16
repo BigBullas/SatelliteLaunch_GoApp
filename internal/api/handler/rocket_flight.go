@@ -124,7 +124,7 @@ func (h *Handler) ChangeRocketFlight(c *gin.Context) {
 
 	err := c.BindJSON(&newRocketFlight)
 
-		h.logger.Println(newRocketFlight)
+	h.logger.Println(newRocketFlight)
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
@@ -191,6 +191,7 @@ func (h *Handler) FormRocketFlight(c *gin.Context) {
 	err = h.StartScanning(flightId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"mesage": err})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Статус успешно изменен на 'formed'"})

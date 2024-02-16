@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -98,12 +97,10 @@ func (r *Repository) DeletePayloadById(cardId int) error {
 	return nil
 }
 
-func (r *Repository) AddPayloadToFlight(creatorId int, requestId int) (int, error) {
+func (r *Repository) AddPayloadToFlight(creatorId int, requestId int) (bool, error) {
 	var rocketFlight models.RocketFlight
 
 	r.db.Where("creator_id = ?", creatorId).Where("status = ?", "draft").First(&rocketFlight)
-
-	// log.Println(rocketFlight)
 
 	if rocketFlight.FlightId == 0 {
 		newRocketFlights := models.RocketFlight{
@@ -114,11 +111,9 @@ func (r *Repository) AddPayloadToFlight(creatorId int, requestId int) (int, erro
 		}
 		res := r.db.Create(&newRocketFlights)
 		if res.Error != nil {
-			return 0, res.Error
+			return false, res.Error
 		}
 		rocketFlight = newRocketFlights
-		log.Println("flightId", rocketFlight.FlightId)
-		log.Println("payloadId", requestId)
 	}
 
 	payloadFlight := models.FlightsPayload{
@@ -129,10 +124,10 @@ func (r *Repository) AddPayloadToFlight(creatorId int, requestId int) (int, erro
 
 	res := r.db.Create(&payloadFlight)
 	if res.Error != nil && res.Error.Error() == "ERROR: duplicate key value violates unique constraint \"flights_payloads_pkey\" (SQLSTATE 23505)" {
-		return 0, errors.New("Данная полезная нагрузка уже добавлена в планируемый полёт")
+		return true, errors.New("данная полезная нагрузка уже добавлена в планируемый полёт")
 	}
 
-	return rocketFlight.FlightId, res.Error
+	return false, res.Error
 }
 
 func (r *Repository) DeletePayloadFromFlight(userId int, requestId int) error {
@@ -140,13 +135,13 @@ func (r *Repository) DeletePayloadFromFlight(userId int, requestId int) error {
 	r.db.Where("creator_id = ? and status = 'draft'", userId).First(&rocketFlight)
 
 	if rocketFlight.FlightId == 0 {
-		return errors.New("Нет заявки-черновика на полёт ракеты-носителя")
+		return errors.New("нет заявки-черновика на полёт ракеты-носителя")
 	}
 
 	var flightsPayload models.FlightsPayload
 	err := r.db.Where("flight_id = ? AND payload_id = ?", rocketFlight.FlightId, requestId).First(&flightsPayload).Error
 	if err != nil {
-		return errors.New("Такой полезной нагрузки нет в данном планируемом полёте")
+		return errors.New("такой полезной нагрузки нет в данном планируемом полёте")
 	}
 
 	err = r.db.Where("flight_id = ? AND payload_id = ?", rocketFlight.FlightId, requestId).Delete(models.FlightsPayload{}).Error
@@ -163,18 +158,18 @@ func (r *Repository) ChangeCountFlightsPayload(userId int, requestId int, count 
 	r.db.Where("creator_id = ? and status = 'draft'", userId).First(&rocketFlight)
 
 	if rocketFlight.FlightId == 0 {
-		return errors.New("Нет заявки-черновика на полёт ракеты-носителя")
+		return errors.New("нет заявки-черновика на полёт ракеты-носителя")
 	}
 
 	var flightsPayload models.FlightsPayload
 	err := r.db.Where("flight_id = ? AND payload_id = ?", rocketFlight.FlightId, requestId).First(&flightsPayload).Error
 	if err != nil {
-		return errors.New("Такой полезной нагрузки нет в данном планируемом полёте")
+		return errors.New("такой полезной нагрузки нет в данном планируемом полёте")
 	}
 
 	flightsPayload.CountSatellites = count
 	if flightsPayload.CountSatellites < 1 {
-		return errors.New("Количество данных полезных нагрузок будет меньше одного после выполнения данной операции")
+		return errors.New("количество данных полезных нагрузок будет меньше одного после выполнения данной операции")
 	}
 
 	err = r.db.Where("flight_id = ? AND payload_id = ?", rocketFlight.FlightId, requestId).Save(flightsPayload).Error
